@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="meta.catalogTitle">Avtomobillar katalogi — Inomarka Bor</title>
+  <meta name="description" data-i18n-content="meta.catalogDesc" content="Sotuvdagi barcha premium avtomobillar: marka, narx, yil va probeg boʻyicha qulay filtr.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <meta property="og:title" content="Avtomobillar katalogi — Inomarka Bor">
+  <meta property="og:image" content="assets/img/brand/og-image.jpg">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="catalog">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.catalog">Avtomobillar</span>
+        </nav>
+        <h1 data-i18n="catalog.title">Avtomobillar katalogi</h1>
+        <p data-i18n="catalog.sub">Barcha mashinalar bir joyda: narx, yil, probeg va kraska holati ochiq yozilgan. Yoqqanini saqlab qoʻying va solishtiring.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="catalog">
+          <aside class="filters" aria-label="Filtrlar" data-i18n-aria="filter.title">
+            <div class="filters__box" id="filters"></div>
+          </aside>
+
+          <div>
+            <div class="toolbar">
+              <button class="btn btn--sm filters-btn" type="button" id="open-filters" aria-controls="filter-sheet" aria-expanded="false">
+                <i data-icon="sliders"></i><span data-i18n="filter.title">Filtrlar</span>
+              </button>
+              <div class="toolbar__count" id="count" aria-live="polite"></div>
+              <div class="toolbar__right">
+                <label class="sr-only" for="sort" data-i18n="sort.label">Saralash</label>
+                <select class="select" id="sort">
+                  <option value="new" data-i18n="sort.new">Avval yangilari</option>
+                  <option value="priceAsc" data-i18n="sort.priceAsc">Avval arzonlari</option>
+                  <option value="priceDesc" data-i18n="sort.priceDesc">Avval qimmatlari</option>
+                  <option value="yearDesc" data-i18n="sort.yearDesc">Yili boʻyicha (yangi)</option>
+                  <option value="kmAsc" data-i18n="sort.kmAsc">Probegi kam</option>
+                </select>
+                <div class="view-toggle" role="group" aria-label="Koʻrinish" data-i18n-aria="view.label">
+                  <button type="button" data-view="grid" aria-label="Toʻr" data-i18n-aria="view.grid"><i data-icon="grid"></i></button>
+                  <button type="button" data-view="list" aria-label="Roʻyxat" data-i18n-aria="view.list"><i data-icon="list"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="active-filters" id="active-filters"></div>
+            <div class="cars-grid" id="results"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="sheet" id="filter-sheet" aria-hidden="true">
+      <div class="sheet__backdrop" data-sheet-close></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet__head">
+          <h3 id="sheet-title" data-i18n="filter.title">Filtrlar</h3>
+          <button class="icon-btn" type="button" data-sheet-close aria-label="Yopish" data-i18n-aria="common.close"><i data-icon="x"></i></button>
+        </div>
+        <div class="filters__box" id="filters-mobile"></div>
+        <div class="sheet__foot">
+          <button class="btn" type="button" data-reset data-i18n="filter.reset">Tozalash</button>
+          <button class="btn btn--gold" type="button" data-sheet-close id="sheet-apply">Koʻrsatish</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/pages/catalog.js"></script>
+</body>
+</html>

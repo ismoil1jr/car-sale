@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="meta.sellTitle">Mashinangizni soting — Inomarka Bor</title>
+  <meta name="description" data-i18n-content="meta.sellDesc" content="Mashinangizni tez va qulay narxda soting: arizani 2 daqiqada qoldiring, 22 000+ auditoriyaga koʻrsatamiz.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <meta property="og:title" content="Mashinangizni soting — Inomarka Bor">
+  <meta property="og:image" content="assets/img/brand/og-image.jpg">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="sell">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.sell">Mashinangizni soting</span>
+        </nav>
+        <h1 data-i18n="sell.title">Mashinangizni soting</h1>
+        <p data-i18n="sell.sub">Arizani 2 daqiqada toʻldiring — biz bogʻlanamiz, narxni birga belgilaymiz va mashinangizni 22 000+ obunachiga koʻrsatamiz.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container form-layout">
+        <form class="form" data-lead-form="sell" data-msg-title="msg.sellTitle" novalidate>
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num">1</span><span data-i18n="sell.step1">Avtomobil haqida</span></h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="s-brand"><span data-i18n="form.brand">Marka</span> <span class="req">*</span></label>
+                <input class="input" id="s-brand" name="brand" list="brand-list" required autocomplete="off" placeholder="Masalan, Chevrolet" data-i18n-placeholder="form.brandPh">
+                <datalist id="brand-list"></datalist>
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="s-model"><span data-i18n="form.model">Model</span> <span class="req">*</span></label>
+                <input class="input" id="s-model" name="model" required placeholder="Masalan, Tahoe" data-i18n-placeholder="form.modelPh">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="s-year"><span data-i18n="form.year">Ishlab chiqarilgan yili</span> <span class="req">*</span></label>
+                <select class="select" id="s-year" name="year" required><option value="" data-i18n="form.choose">Tanlang</option></select>
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="s-km"><span data-i18n="form.mileage">Probeg, km</span> <span class="req">*</span></label>
+                <input class="input" id="s-km" name="mileage" type="number" inputmode="numeric" min="0" step="1000" required placeholder="45000">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="s-price" data-i18n="form.priceWish">Kutilayotgan narx, $</label>
+                <input class="input" id="s-price" name="price" type="number" inputmode="numeric" min="0" step="500" placeholder="50000">
+              </div>
+              <div class="field">
+                <label for="s-color" data-i18n="form.color">Rangi</label>
+                <select class="select" id="s-color" name="color"><option value="" data-i18n="form.choose">Tanlang</option></select>
+              </div>
+              <fieldset class="field full" style="border:0;padding:0;margin:0">
+                <legend class="label" style="margin-bottom:8px" data-i18n="form.condition">Kraska holati</legend>
+                <div class="radio-cards">
+                  <label class="radio-card"><input type="radio" name="condition" value="clean" checked><span><i data-icon="shield"></i><span data-i18n="cond.cleanShort">Tozza</span></span></label>
+                  <label class="radio-card"><input type="radio" name="condition" value="partial"><span><i data-icon="palette"></i><span data-i18n="cond.partialShort">Qisman kraska</span></span></label>
+                  <label class="radio-card"><input type="radio" name="condition" value="repair"><span><i data-icon="wrench"></i><span data-i18n="cond.repairShort">Taʼmir talab</span></span></label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num">2</span><span data-i18n="sell.step2">Rasmlar</span></h2>
+            <label class="upload" id="upload">
+              <input type="file" accept="image/*" multiple data-ignore aria-label="Rasmlarni tanlang" data-i18n-aria="form.uploadAria">
+              <i data-icon="upload"></i>
+              <b data-i18n="form.uploadTitle">Rasmlarni shu yerga tashlang yoki tanlang</b>
+              <small data-i18n="form.uploadHint">Old, orqa, yon, salon va probeg — 5–10 ta rasm yetarli</small>
+            </label>
+            <div class="previews" id="previews"></div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num">3</span><span data-i18n="sell.step3">Aloqa maʼlumotlari</span></h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="s-name"><span data-i18n="form.name">Ismingiz</span> <span class="req">*</span></label>
+                <input class="input" id="s-name" name="name" required autocomplete="name" placeholder="Ism" data-i18n-placeholder="form.namePh">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="s-phone"><span data-i18n="form.phone">Telefon raqam</span> <span class="req">*</span></label>
+                <input class="input" id="s-phone" name="phone" type="tel" required autocomplete="tel" placeholder="+998 (__) ___-__-__">
+                <span class="field__error" data-i18n="form.phoneError">Raqamni toʻliq kiriting</span>
+              </div>
+              <div class="field full">
+                <label for="s-comment" data-i18n="form.comment">Qoʻshimcha maʼlumot</label>
+                <textarea class="textarea" id="s-comment" name="comment" placeholder="Komplektatsiya, servis tarixi, egalar soni..." data-i18n-placeholder="form.commentPh"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn--gold btn--lg" type="submit"><i data-icon="telegram"></i><span data-i18n="form.submit">Arizani yuborish</span></button>
+          <p class="field__hint" data-i18n="form.privacy">Maʼlumotlaringiz faqat siz bilan bogʻlanish uchun ishlatiladi.</p>
+        </form>
+
+        <aside>
+          <div class="side-card">
+            <h3 data-i18n="sell.whyTitle">Nega bizga ishonishadi?</h3>
+            <ul class="benefits">
+              <li><i data-icon="users"></i><span data-i18n="sell.why1">22 000+ faol auditoriya — xaridor tez topiladi</span></li>
+              <li><i data-icon="play"></i><span data-i18n="sell.why2">Professional videosharh va chiroyli eʼlon</span></li>
+              <li><i data-icon="tag"></i><span data-i18n="sell.why3">Bozor narxini toʻgʻri baholaymiz</span></li>
+              <li><i data-icon="file"></i><span data-i18n="sell.why4">Oldi-sotdi hujjatlarida yordam</span></li>
+              <li><i data-icon="award"></i><span data-i18n="sell.why5">16 yillik tajriba va obroʻ</span></li>
+            </ul>
+          </div>
+          <div class="side-card">
+            <h3 data-i18n="sell.fastTitle">Tezroq gaplashamizmi?</h3>
+            <div class="contact-lines" id="side-contacts"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/pages/forms.js"></script>
+</body>
+</html>

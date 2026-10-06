@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="meta.contactTitle">Aloqa — Inomarka Bor</title>
+  <meta name="description" data-i18n-content="meta.contactDesc" content="Inomarka Bor bilan bogʻlaning: telefon, Telegram, Instagram. Toshkent.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <meta property="og:title" content="Aloqa — Inomarka Bor">
+  <meta property="og:image" content="assets/img/brand/og-image.jpg">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="contact">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.contact">Aloqa</span>
+        </nav>
+        <h1 data-i18n="contact.title">Biz bilan bogʻlaning</h1>
+        <p data-i18n="contact.sub">Savolingiz bormi yoki mashina tanlashda yordam kerakmi? Qulay usulni tanlang — tez javob beramiz.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="contact-grid" id="contact-cards"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container form-layout">
+        <form class="form" data-lead-form="contact" data-msg-title="msg.contactTitle" novalidate>
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num"><i data-icon="message"></i></span><span data-i18n="contact.formTitle">Murojaat qoldiring</span></h2>
+            <div class="form-grid">
+              <fieldset class="field full" style="border:0;padding:0;margin:0">
+                <legend class="label" style="margin-bottom:8px" data-i18n="contact.type">Murojaat turi</legend>
+                <div class="radio-cards">
+                  <label class="radio-card"><input type="radio" name="type" value="buy" checked><span><i data-icon="car"></i><span data-i18n="contact.typeBuy">Mashina sotib olish</span></span></label>
+                  <label class="radio-card"><input type="radio" name="type" value="find"><span><i data-icon="search"></i><span data-i18n="contact.typeFind">Mashina topib berish</span></span></label>
+                  <label class="radio-card"><input type="radio" name="type" value="ads"><span><i data-icon="megaphone"></i><span data-i18n="contact.typeAds">Reklama / hamkorlik</span></span></label>
+                  <label class="radio-card"><input type="radio" name="type" value="other"><span><i data-icon="message"></i><span data-i18n="contact.typeOther">Boshqa savol</span></span></label>
+                </div>
+              </fieldset>
+              <div class="field">
+                <label for="c-name"><span data-i18n="form.name">Ismingiz</span> <span class="req">*</span></label>
+                <input class="input" id="c-name" name="name" required autocomplete="name" placeholder="Ism" data-i18n-placeholder="form.namePh">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="c-phone"><span data-i18n="form.phone">Telefon raqam</span> <span class="req">*</span></label>
+                <input class="input" id="c-phone" name="phone" type="tel" required autocomplete="tel" placeholder="+998 (__) ___-__-__">
+                <span class="field__error" data-i18n="form.phoneError">Raqamni toʻliq kiriting</span>
+              </div>
+              <div class="field full">
+                <label for="c-budget" data-i18n="contact.budget">Byudjet, $</label>
+                <input class="input" id="c-budget" name="budget" type="number" inputmode="numeric" min="0" step="1000" placeholder="70000">
+              </div>
+              <div class="field full">
+                <label for="c-message"><span data-i18n="contact.message">Xabar</span> <span class="req">*</span></label>
+                <textarea class="textarea" id="c-message" name="message" required placeholder="Qanday mashina qidiryapsiz? Marka, yil, rang..." data-i18n-placeholder="contact.messagePh"></textarea>
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn--gold btn--lg" type="submit"><i data-icon="telegram"></i><span data-i18n="form.submit">Arizani yuborish</span></button>
+        </form>
+
+        <aside>
+          <div class="side-card">
+            <h3 data-i18n="contact.hoursTitle">Ish vaqti</h3>
+            <ul class="benefits">
+              <li><i data-icon="clock"></i><span id="hours"></span></li>
+              <li><i data-icon="pin"></i><span id="city"></span></li>
+              <li><i data-icon="info"></i><span data-i18n="contact.visit">Mashinani koʻrish uchun oldindan qoʻngʻiroq qilib, vaqtni kelishib oling.</span></li>
+            </ul>
+          </div>
+          <div class="side-card">
+            <h3 data-i18n="contact.channelTitle">Yangi eʼlonlarni oʻtkazib yubormang</h3>
+            <p style="color:var(--muted);margin-bottom:16px" data-i18n="contact.channelText">Telegram kanalga obuna boʻling — yangi mashinalar birinchi boʻlib shu yerda chiqadi.</p>
+            <a class="btn btn--tg btn--block" id="channel-btn" href="#" target="_blank" rel="noopener"><i data-icon="telegram"></i><span data-i18n="contact.subscribe">Obuna boʻlish</span></a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="map">
+          <iframe id="map" title="Xarita" data-i18n-aria="contact.map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/pages/forms.js"></script>
+  <script>
+    /* Aloqa kartochkalari va xarita */
+    (function () {
+      var C = IB.config;
+      var t = IB.t;
+      var cards = C.phones.map(function (p) {
+        return { href: "tel:" + p.number, icon: "phone", label: IB.L(p.label), value: p.display };
+      });
+      cards.push({ href: IB.links.tg(), icon: "telegram", label: t("contact.tgPersonal"), value: "@" + C.telegram.personal, ext: true });
+      cards.push({ href: IB.links.ig(), icon: "instagram", label: "Instagram", value: "@" + C.instagram, ext: true });
+      IB.qs("#contact-cards").innerHTML = cards.map(function (c, i) {
+        return (
+          '<a class="contact-card reveal' + (i ? " reveal-delay-" + Math.min(i, 3) : "") + '" href="' + IB.esc(c.href) + '"' + (c.ext ? ' target="_blank" rel="noopener"' : "") + ">" +
+          '<div class="feature__icon">' + IB.icon(c.icon) + "</div><small>" + IB.esc(c.label) + "</small><b>" + IB.esc(c.value) + "</b></a>"
+        );
+      }).join("");
+      IB.qs("#hours").textContent = IB.L(C.workHours);
+      IB.qs("#city").textContent = IB.L(C.city);
+      IB.qs("#channel-btn").href = IB.links.tgChannel();
+      IB.qs("#map").src = "https://maps.google.com/maps?q=" + encodeURIComponent(C.mapQuery) + "&z=12&output=embed&hl=" + IB.lang;
+      IB.reveal();
+    })();
+  </script>
+</body>
+</html>

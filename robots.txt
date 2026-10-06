@@ -1,0 +1,4 @@
+# Demo versiya: mijoz rozi bo'lguncha qidiruv tizimlari indeksatsiya qilmasin.
+# Ishga tushirilganda: "Disallow: /" ni olib tashlang va Sitemap qo'shing.
+User-agent: *
+Disallow: /

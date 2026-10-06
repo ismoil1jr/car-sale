@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="meta.favTitle">Saqlanganlar — Inomarka Bor</title>
+  <meta name="description" content="Saqlangan avtomobillar va taqqoslash jadvali.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="favorites">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.favorites">Saqlanganlar</span>
+        </nav>
+        <h1 data-i18n="fav.title">Saqlangan avtomobillar</h1>
+        <p data-i18n="fav.sub">Yoqqan mashinalarni ♥ tugmasi bilan saqlang va bir-biri bilan solishtiring.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cars-grid" id="fav-grid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="compare-section" hidden style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="compare.eyebrow">Taqqoslash</span>
+            <h2 class="section-title" data-i18n="compare.title">Yonma-yon solishtiring</h2>
+            <p class="section-sub" data-i18n="compare.sub">★ — eng yaxshi qiymat (arzon narx, kam probeg, yangi yil, kuchli dvigatel).</p>
+          </div>
+        </div>
+        <div class="compare-wrap"><table class="compare" id="compare"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script>
+    /* Saqlanganlar + taqqoslash jadvali */
+    (function () {
+      var t = IB.t;
+      function render() {
+        var cars = IB.favs.list().map(IB.cars.get).filter(Boolean);
+        var grid = IB.qs("#fav-grid");
+        if (!cars.length) {
+          grid.innerHTML =
+            '<div class="empty" style="grid-column:1/-1"><div class="empty__icon">' + IB.icon("heart") + "</div>" +
+            "<h3>" + IB.esc(t("fav.emptyTitle")) + "</h3><p>" + IB.esc(t("fav.emptyText")) + "</p>" +
+            '<a class="btn btn--gold" href="catalog.html">' + IB.esc(t("hero.cta")) + "</a></div>";
+          IB.qs("#compare-section").hidden = true;
+          return;
+        }
+        grid.innerHTML = cars.map(function (c) { return IB.carCard(c, { reveal: false }); }).join("");
+        IB.favs.sync();
+
+        var cmp = cars.slice(0, 4);
+        IB.qs("#compare-section").hidden = cmp.length < 2;
+        if (cmp.length < 2) return;
+
+        function best(values, mode) {
+          var nums = values.filter(function (v) { return typeof v === "number"; });
+          return mode === "min" ? Math.min.apply(null, nums) : Math.max.apply(null, nums);
+        }
+        var rows = [
+          { key: "spec.price", get: function (c) { return c.price; }, fmt: IB.fmt.price, best: "min" },
+          { key: "spec.year", get: function (c) { return c.year; }, fmt: String, best: "max" },
+          { key: "spec.mileage", get: function (c) { return c.mileage; }, fmt: IB.fmt.km, best: "min" },
+          { key: "spec.power", get: function (c) { return c.power; }, fmt: function (v) { return v + " " + t("unit.hp"); }, best: "max" },
+          { key: "spec.engine", get: function (c) { return c.engine; } },
+          { key: "spec.fuel", get: function (c) { return t("fuel." + c.fuel); } },
+          { key: "spec.drive", get: function (c) { return t("drive." + c.drive); } },
+          { key: "spec.body", get: function (c) { return t("body." + c.body); } },
+          { key: "spec.color", get: function (c) { return t("color." + c.color); } },
+          { key: "spec.seats", get: function (c) { return c.seats; } },
+          { key: "spec.condition", get: function (c) { return t("cond." + c.condition + "Short"); } },
+          { key: "spec.status", get: function (c) { return t("status." + c.status); } },
+        ];
+        var head =
+          '<thead><tr><th scope="row">' + IB.esc(t("compare.car")) + "</th>" +
+          cmp.map(function (c) {
+            return '<th class="compare__car" scope="col"><a href="' + IB.esc(IB.cars.url(c)) + '"><img src="' + IB.esc(IB.cars.image(c, 0, true)) + '" alt="" loading="lazy">' + IB.esc(IB.cars.title(c)) + "</a></th>";
+          }).join("") + "</tr></thead>";
+        var body = rows.map(function (r) {
+          var vals = cmp.map(r.get);
+          var b = r.best ? best(vals, r.best) : null;
+          return (
+            '<tr><th scope="row">' + IB.esc(t(r.key)) + "</th>" +
+            vals.map(function (v) {
+              var isBest = r.best && v === b && vals.filter(function (x) { return x === b; }).length < vals.length;
+              return "<td" + (isBest ? ' class="best"' : "") + ">" + IB.esc(v == null || v === "" ? "—" : r.fmt ? r.fmt(v) : v) + "</td>";
+            }).join("") + "</tr>"
+          );
+        }).join("");
+        IB.qs("#compare").innerHTML = head + "<tbody>" + body + "</tbody>";
+      }
+      document.addEventListener("ib:favs", render);
+      render();
+    })();
+  </script>
+</body>
+</html>

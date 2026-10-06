@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="meta.homeTitle">Inomarka Bor — Premium avtomobillar Toshkentda</title>
+  <meta name="description" data-i18n-content="meta.homeDesc" content="Toshkentda premium avtomobillar savdosi: halol probeg, ochiq narx, har bir mashina haqida toʻliq maʼlumot. 16 yillik tajriba.">
+  <!-- Demo: mijoz rozi boʻlguncha qidiruv tizimlari indeksatsiya qilmasin -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Inomarka Bor — Premium avtomobillar">
+  <meta property="og:description" content="Halol probeg, ochiq narx, 16 yillik tajriba.">
+  <meta property="og:image" content="assets/img/brand/og-image.jpg">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="preload" as="image" href="assets/img/cars/lexus-lx600-2023-1.webp">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AutoDealer",
+    "name": "Inomarka Bor",
+    "description": "Premium avtomobillar savdosi. 16 yillik tajriba.",
+    "telephone": "+998957022222",
+    "address": { "@type": "PostalAddress", "addressLocality": "Tashkent", "addressCountry": "UZ" },
+    "sameAs": ["https://www.instagram.com/_inomarka_bor_/", "https://t.me/inomarka_bor_1"]
+  }
+  </script>
+</head>
+<body data-page="home">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__media">
+        <img src="assets/img/cars/lexus-lx600-2023-1.webp" alt="" width="1600" height="1067" fetchpriority="high">
+      </div>
+      <div class="container hero__inner">
+        <span class="hero__badge reveal"><span class="dot"><i data-icon="verified"></i></span><span data-i18n="hero.badge">16 yillik tajriba · Toshkent</span></span>
+        <h1 class="hero__title reveal reveal-delay-1">
+          <span data-i18n="hero.title1">Premium</span>
+          <span class="text-gold" data-i18n="hero.title2">avtomobillar</span>
+        </h1>
+        <p class="hero__lead reveal reveal-delay-2" data-i18n="hero.lead">Halol probeg, ochiq narx va har bir mashina haqida toʻliq maʼlumot — Instagram izohlaridan qidirib oʻtirishingiz shart emas.</p>
+        <div class="hero__cta reveal reveal-delay-3">
+          <a class="btn btn--gold btn--lg" href="catalog.html"><span data-i18n="hero.cta">Katalogni koʻrish</span><i data-icon="arrowR"></i></a>
+          <a class="btn btn--lg" id="hero-tg" href="#" target="_blank" rel="noopener"><i data-icon="telegram"></i><span data-i18n="cta.telegram">Telegram orqali yozish</span></a>
+        </div>
+
+        <form class="quick-search reveal" action="catalog.html" method="get" role="search" aria-label="Tezkor qidiruv" data-i18n-aria="qs.label">
+          <div class="qs-field">
+            <label for="qs-brand" data-i18n="filter.brand">Marka</label>
+            <select id="qs-brand" name="brand"><option value="" data-i18n="filter.allBrands">Barcha markalar</option></select>
+          </div>
+          <div class="qs-field">
+            <label for="qs-body" data-i18n="filter.body">Kuzov turi</label>
+            <select id="qs-body" name="body"><option value="" data-i18n="filter.any">Istalgan</option></select>
+          </div>
+          <div class="qs-field">
+            <label for="qs-price" data-i18n="filter.priceTo">Narx (gacha)</label>
+            <select id="qs-price" name="priceMax"><option value="" data-i18n="filter.any">Istalgan</option></select>
+          </div>
+          <button class="btn btn--gold" type="submit"><i data-icon="search"></i><span data-i18n="filter.searchBtn">Qidirish</span></button>
+        </form>
+
+        <div class="hero__stats reveal">
+          <div class="stat"><div class="stat__value text-gold"><span data-count="16">16</span>+</div><div class="stat__label" data-i18n="stats.years">yillik tajriba</div></div>
+          <div class="stat"><div class="stat__value">22.3K</div><div class="stat__label" data-i18n="stats.followers">Instagram obunachilar</div></div>
+          <div class="stat"><div class="stat__value"><span id="stat-sale" data-count="0">0</span></div><div class="stat__label" data-i18n="stats.forSale">mashina hozir sotuvda</div></div>
+          <div class="stat"><div class="stat__value"><span id="stat-sold" data-count="0">0</span></div><div class="stat__label" data-i18n="stats.sold">Baraka boʻldi 🤝</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARKALAR -->
+    <section class="section section--tight" aria-labelledby="brands-title">
+      <div class="container">
+        <h2 class="sr-only" id="brands-title" data-i18n="home.brands">Markalar</h2>
+        <div class="brands" id="brands"></div>
+      </div>
+    </section>
+
+    <!-- SOTUVDA -->
+    <section class="section" style="padding-top:24px">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="home.saleEyebrow">Sotuvda</span>
+            <h2 class="section-title" data-i18n="home.saleTitle">Eng yaxshi takliflar</h2>
+            <p class="section-sub" data-i18n="home.saleSub">Har bir eʼlonda yil, probeg, kraska holati va narx ochiq yozilgan.</p>
+          </div>
+          <a class="link-arrow" href="catalog.html"><span data-i18n="home.allCars">Barcha avtomobillar</span><i data-icon="arrowR"></i></a>
+        </div>
+        <div class="cars-grid" id="featured"></div>
+      </div>
+    </section>
+
+    <!-- NEGA BIZ -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="home.whyEyebrow">Nega aynan biz</span>
+            <h2 class="section-title" data-i18n="home.whyTitle">Ishonch — eng qimmat valyuta</h2>
+          </div>
+        </div>
+        <div class="features">
+          <div class="feature reveal">
+            <div class="feature__icon"><i data-icon="award"></i></div>
+            <h3 data-i18n="why.1t">16 yillik tajriba</h3>
+            <p data-i18n="why.1d">Premium avtomobillar bozorini ichidan bilamiz — qaysi mashina, qaysi narxga arziydi.</p>
+          </div>
+          <div class="feature reveal reveal-delay-1">
+            <div class="feature__icon"><i data-icon="shield"></i></div>
+            <h3 data-i18n="why.2t">Halol maʼlumot</h3>
+            <p data-i18n="why.2d">Probeg, kraska va texnik holat — yashirmasdan, eʼlonning oʻzida yoziladi.</p>
+          </div>
+          <div class="feature reveal reveal-delay-2">
+            <div class="feature__icon"><i data-icon="file"></i></div>
+            <h3 data-i18n="why.3t">Hujjatlarda yordam</h3>
+            <p data-i18n="why.3d">Oldi-sotdi va rasmiylashtirish jarayonida boshidan oxirigacha yoningizdamiz.</p>
+          </div>
+          <div class="feature reveal reveal-delay-3">
+            <div class="feature__icon"><i data-icon="handshake"></i></div>
+            <h3 data-i18n="why.4t">Baraka boʻldi 🤝</h3>
+            <p data-i18n="why.4d">Har bir sotuv — ochiq. Sotilgan mashinalar tarixi saytda va Instagramʼda.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BARAKA BOʻLDI -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="home.soldEyebrow">Baraka boʻldi 🤝</span>
+            <h2 class="section-title" data-i18n="home.soldTitle">Yangi egalariga muborak</h2>
+            <p class="section-sub" data-i18n="home.soldSub">Yaqinda sotilgan avtomobillar — bizga ishonch bildirganlar uchun rahmat.</p>
+          </div>
+          <div class="slider__nav">
+            <button class="icon-btn" type="button" data-slide="-1" aria-label="Oldingi" data-i18n-aria="common.prev"><i data-icon="chevL"></i></button>
+            <button class="icon-btn" type="button" data-slide="1" aria-label="Keyingi" data-i18n-aria="common.next"><i data-icon="chevR"></i></button>
+          </div>
+        </div>
+        <div class="slider">
+          <div class="slider__track" id="sold-track"></div>
+        </div>
+        <p style="margin-top:24px"><a class="link-arrow" href="sold.html"><span data-i18n="home.allSold">Barcha sotilganlar</span><i data-icon="arrowR"></i></a></p>
+      </div>
+    </section>
+
+    <!-- JARAYON -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="home.stepsEyebrow">Qanday ishlaymiz</span>
+            <h2 class="section-title" data-i18n="home.stepsTitle">4 qadamda yangi mashina</h2>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step reveal"><h3 data-i18n="step.1t">Tanlang</h3><p data-i18n="step.1d">Katalogdan mashinani tanlang yoki bizga qanday mashina kerakligini yozing.</p></div>
+          <div class="step reveal reveal-delay-1"><h3 data-i18n="step.2t">Koʻring va tekshiring</h3><p data-i18n="step.2d">Kelishilgan vaqtda jonli koʻrasiz, xohlasangiz istalgan servisda tekshirtirasiz.</p></div>
+          <div class="step reveal reveal-delay-2"><h3 data-i18n="step.3t">Kelishing</h3><p data-i18n="step.3d">Narx va shartlarni ochiq gaplashamiz — yashirin toʻlovlarsiz.</p></div>
+          <div class="step reveal reveal-delay-3"><h3 data-i18n="step.4t">Rasmiylashtiring</h3><p data-i18n="step.4d">Hujjatlarni birga rasmiylashtiramiz. Kalit — sizda. Baraka boʻlsin! 🤝</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOTISH CTA -->
+    <section class="section">
+      <div class="container">
+        <div class="cta-band reveal">
+          <div>
+            <span class="eyebrow" data-i18n="home.sellEyebrow">Sotuvchilar uchun</span>
+            <h2 data-i18n="home.sellTitle">Mashinangizni tez va qulay narxda soting</h2>
+            <p data-i18n="home.sellText">Arizani 2 daqiqada qoldiring — mashinangizni 22 000+ obunachiga koʻrsatamiz va xaridor topishda yordam beramiz.</p>
+          </div>
+          <div class="cta-band__actions">
+            <a class="btn btn--gold btn--lg" href="sell.html"><span data-i18n="home.sellBtn">Ariza qoldirish</span><i data-icon="arrowR"></i></a>
+            <a class="btn btn--lg" id="sell-call" href="#"><i data-icon="phone"></i><span data-i18n="cta.call">Qoʻngʻiroq qilish</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IJTIMOIY TARMOQLAR -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="home.socialEyebrow">Biz bilan birga</span>
+            <h2 class="section-title" data-i18n="home.socialTitle">Har kuni yangi mashinalar</h2>
+            <p class="section-sub" data-i18n="home.socialSub">Videosharhlar, yangi eʼlonlar va “Baraka boʻldi” lahzalari — Instagram va Telegramʼda.</p>
+          </div>
+        </div>
+        <div class="social-grid">
+          <a class="social-card reveal" id="ig-card" href="#" target="_blank" rel="noopener">
+            <span class="social-card__icon social-card__icon--ig"><i data-icon="instagram"></i></span>
+            <div><h3>@_inomarka_bor_</h3><p data-i18n="home.igText">22.3K obunachi · 120+ videosharh</p></div>
+            <span class="link-arrow"><i data-icon="arrowUR"></i></span>
+          </a>
+          <a class="social-card reveal reveal-delay-1" id="tg-card" href="#" target="_blank" rel="noopener">
+            <span class="social-card__icon social-card__icon--tg"><i data-icon="telegram"></i></span>
+            <div><h3 data-i18n="home.tgTitle">Telegram kanal</h3><p data-i18n="home.tgText">Yangi eʼlonlar birinchi boʻlib shu yerda</p></div>
+            <span class="link-arrow"><i data-icon="arrowUR"></i></span>
+          </a>
+        </div>
+        <div class="reels" id="reels"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <div class="container faq-layout">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="home.faqEyebrow">Savol-javob</span>
+            <h2 class="section-title" data-i18n="home.faqTitle">Koʻp beriladigan savollar</h2>
+            <p class="section-sub" data-i18n="home.faqSub">Javob topolmadingizmi? Bizga yozing — tez javob beramiz.</p>
+            <p style="margin-top:22px"><a class="btn btn--tg" id="faq-tg" href="#" target="_blank" rel="noopener"><i data-icon="telegram"></i><span data-i18n="cta.telegram">Telegram orqali yozish</span></a></p>
+          </div>
+        </div>
+        <div class="faq">
+          <details><summary data-i18n="faq.1q">Mashinani qanday koʻrsam boʻladi?</summary><p data-i18n="faq.1a">Oldindan qoʻngʻiroq qiling yoki Telegramʼda yozing — sizga qulay vaqtni kelishib olamiz. Boshqa shahardan boʻlsangiz, videoqoʻngʻiroq orqali batafsil koʻrsatamiz.</p></details>
+          <details><summary data-i18n="faq.2q">Eʼlondagi maʼlumotlarga ishonsa boʻladimi?</summary><p data-i18n="faq.2a">Ha. Yil, probeg va kraska holati ochiq yoziladi. Koʻrish vaqtida mashinani oʻzingiz tanlagan servisda tekshirtirishingiz mumkin.</p></details>
+          <details><summary data-i18n="faq.3q">Narx kelishiladimi?</summary><p data-i18n="faq.3a">Koʻp eʼlonlarda narx kelishiladi — bu narx yonida “Kelishiladi” deb belgilangan.</p></details>
+          <details><summary data-i18n="faq.4q">Hujjatlarni rasmiylashtirishda yordam berasizmi?</summary><p data-i18n="faq.4a">Albatta. Oldi-sotdi jarayonida barcha bosqichlarda maslahat va yordam beramiz.</p></details>
+          <details><summary data-i18n="faq.5q">Oʻz mashinamni sotishga bera olamanmi?</summary><p data-i18n="faq.5a">Ha. “Mashinangizni soting” sahifasida ariza qoldiring — biz siz bilan bogʻlanamiz va eng yaxshi variantni taklif qilamiz.</p></details>
+          <details><summary data-i18n="faq.6q">Kerakli mashina katalogda boʻlmasa-chi?</summary><p data-i18n="faq.6a">Bizga yozing: marka, yil va byudjetni ayting — 16 yillik tajriba va aloqalarimiz orqali topib beramiz.</p></details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/pages/home.js"></script>
+</body>
+</html>

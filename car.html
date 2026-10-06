@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Avtomobil — Inomarka Bor</title>
+  <meta name="description" content="Avtomobil haqida toʻliq maʼlumot: narx, yil, probeg, holati va rasmlar.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="Inomarka Bor">
+  <meta property="og:image" content="assets/img/brand/og-image.jpg">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="car">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <div class="container" style="padding-top:28px">
+      <nav class="breadcrumbs" id="crumbs" aria-label="Breadcrumb">
+        <a href="index.html" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><a href="catalog.html" data-i18n="nav.catalog">Avtomobillar</a>
+      </nav>
+      <div id="car-root">
+        <div class="car-layout" aria-busy="true">
+          <div class="skeleton" style="aspect-ratio:3/2;border-radius:24px"></div>
+          <div class="skeleton" style="height:460px;border-radius:24px"></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="section" id="similar-section" hidden>
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="car.similarEyebrow">Sizga yoqishi mumkin</span>
+            <h2 class="section-title" data-i18n="car.similar">Oʻxshash avtomobillar</h2>
+          </div>
+          <a class="link-arrow" href="catalog.html"><span data-i18n="home.allCars">Barcha avtomobillar</span><i data-icon="arrowR"></i></a>
+        </div>
+        <div class="cars-grid" id="similar"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/photo-credits.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/pages/car.js"></script>
+</body>
+</html>

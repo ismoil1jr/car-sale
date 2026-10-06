@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="meta.soldTitle">Baraka boʻldi — sotilgan avtomobillar | Inomarka Bor</title>
+  <meta name="description" data-i18n-content="meta.soldDesc" content="Inomarka Bor orqali yangi egasini topgan avtomobillar. Har bir sotuv — ochiq.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  <meta property="og:title" content="Baraka boʻldi 🤝 — Inomarka Bor">
+  <meta property="og:image" content="assets/img/brand/og-image.jpg">
+  <link rel="icon" href="assets/img/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/brand/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="sold">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.sold">Baraka boʻldi</span>
+        </nav>
+        <h1><span data-i18n="sold.title">Baraka boʻldi</span> <span aria-hidden="true">🤝</span></h1>
+        <p id="sold-lead" data-i18n="sold.sub">Bu mashinalar allaqachon yangi egalariga yetkazildi. Har bir sotuv — ochiq va halol.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="toolbar">
+          <div class="filter-chips" id="sold-brands" role="group" aria-label="Marka" data-i18n-aria="filter.brand"></div>
+        </div>
+        <div class="cars-grid" id="sold-grid"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-band reveal">
+          <div>
+            <span class="eyebrow" data-i18n="sold.ctaEyebrow">Siz ham shunday mashina istaysizmi?</span>
+            <h2 data-i18n="sold.ctaTitle">Kerakli mashinani topib beramiz</h2>
+            <p data-i18n="sold.ctaText">Marka, yil va byudjetingizni yozing — 16 yillik tajriba va keng aloqalarimiz orqali eng yaxshi variantni topamiz.</p>
+          </div>
+          <div class="cta-band__actions">
+            <a class="btn btn--gold btn--lg" href="contact.html?type=find"><span data-i18n="sold.ctaBtn">Buyurtma berish</span><i data-icon="arrowR"></i></a>
+            <a class="btn btn--lg" href="catalog.html" data-i18n="hero.cta">Katalogni koʻrish</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/cars.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script>
+    /* Sotilgan mashinalar + marka bo'yicha filtr */
+    (function () {
+      var sold = IB.cars.sold();
+      var active = "";
+      var lead = IB.qs("#sold-lead");
+      lead.textContent = IB.t("sold.lead", { n: sold.length });
+
+      var brands = IB.cars.brands(sold);
+      IB.qs("#sold-brands").innerHTML =
+        '<button type="button" class="filter-chip is-active" data-b="" aria-pressed="true">' + IB.esc(IB.t("sold.all")) + " (" + sold.length + ")</button>" +
+        brands.map(function (b) {
+          return '<button type="button" class="filter-chip" data-b="' + IB.esc(b.name) + '" aria-pressed="false">' + IB.esc(b.name) + " (" + b.count + ")</button>";
+        }).join("");
+
+      function render() {
+        var list = sold.filter(function (c) { return !active || c.brand === active; });
+        IB.qs("#sold-grid").innerHTML = list.length
+          ? list.map(function (c) { return IB.carCard(c); }).join("")
+          : '<div class="empty" style="grid-column:1/-1"><h3>' + IB.esc(IB.t("sold.empty")) + "</h3></div>";
+        IB.favs.sync();
+        IB.reveal();
+      }
+      IB.qs("#sold-brands").addEventListener("click", function (e) {
+        var chip = e.target.closest("[data-b]");
+        if (!chip) return;
+        active = chip.getAttribute("data-b");
+        IB.qsa("#sold-brands [data-b]").forEach(function (c) {
+          var on = c === chip;
+          c.classList.toggle("is-active", on);
+          c.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        render();
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>
