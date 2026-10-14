@@ -36,16 +36,16 @@ def present_choices(qs, field, choices):
 # Kategoriyalar (Avtoelon/OLX kabi: kuzov turi va yoqilg'i bo'yicha)
 # --------------------------------------------------------------------------- #
 CATEGORIES = [
-    # (kalit, GET parametri, qiymati, uz nomi, i18n kaliti, belgi, doim ko'rsatilsinmi)
-    ("suv", "body", "suv", "SUV / Yoʻltanlamas", "body.suv", "🚙", False),
-    ("sedan", "body", "sedan", "Sedan", "body.sedan", "🚘", False),
-    ("pickup", "body", "pickup", "Pikap", "body.pickup", "🛻", False),
-    ("liftback", "body", "liftback", "Liftbek", "body.liftback", "🚗", False),
-    ("hatchback", "body", "hatchback", "Hetchbek", "body.hatchback", "🚗", False),
-    ("minivan", "body", "minivan", "Miniven", "body.minivan", "🚐", False),
-    ("coupe", "body", "coupe", "Kupe", "body.coupe", "🏎️", False),
-    ("electric", "fuel", "electric", "Elektromobillar", "brand.electric", "⚡", True),
-    ("hybrid", "fuel", "hybrid", "Gibridlar", "cat.hybrid", "🔋", False),
+    # (kalit, GET parametri, qiymati, uz nomi, i18n kaliti, ikon (core.js ICONS), doim ko'rsatilsinmi)
+    ("suv", "body", "suv", "SUV / Yoʻltanlamas", "body.suv", "carSuv", False),
+    ("sedan", "body", "sedan", "Sedan", "body.sedan", "carSedan", False),
+    ("pickup", "body", "pickup", "Pikap", "body.pickup", "carPickup", False),
+    ("liftback", "body", "liftback", "Liftbek", "body.liftback", "carLiftback", False),
+    ("hatchback", "body", "hatchback", "Hetchbek", "body.hatchback", "carHatch", False),
+    ("minivan", "body", "minivan", "Miniven", "body.minivan", "carVan", False),
+    ("coupe", "body", "coupe", "Kupe", "body.coupe", "carCoupe", False),
+    ("electric", "fuel", "electric", "Elektromobillar", "brand.electric", "bolt", True),
+    ("hybrid", "fuel", "hybrid", "Gibridlar", "cat.hybrid", "leaf", False),
 ]
 
 
@@ -241,8 +241,16 @@ def catalog(request):
 # --------------------------------------------------------------------------- #
 # Mashina sahifasi
 # --------------------------------------------------------------------------- #
-def car_detail(request, slug):
-    car = get_object_or_404(cars_qs().prefetch_related("features"), slug=slug)
+def car_by_slug(request, slug):
+    """Eski /car/<slug>/ havolalarini yangi /car/<id>/<slug>/ manziliga yo'naltiradi."""
+    car = get_object_or_404(Car, slug=slug)
+    return redirect(car, permanent=True)
+
+
+def car_detail(request, pk, slug=None):
+    car = get_object_or_404(cars_qs().prefetch_related("features"), pk=pk)
+    if slug != car.slug:
+        return redirect(car, permanent=True)
 
     def score(c):
         s = 0

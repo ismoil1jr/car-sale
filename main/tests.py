@@ -92,3 +92,22 @@ class CategoryTests(TestCase):
         active = [c["key"] for c in r.context["categories"] if c["active"]]
         self.assertEqual(active, ["sedan"])
         self.assertEqual(r.context["count"], 2)
+
+
+class CarUrlTests(TestCase):
+    def test_same_car_twice_gets_unique_urls(self):
+        a = make_car(model="LX 600", year=2023)
+        b = make_car(model="LX 600", year=2023)
+        self.assertNotEqual(a.get_absolute_url(), b.get_absolute_url())
+        self.assertEqual(a.get_absolute_url(), f"/car/{a.pk}/lexus-lx-600-2023/")
+        for car in (a, b):
+            r = self.client.get(car.get_absolute_url())
+            self.assertEqual(r.status_code, 200)
+            self.assertEqual(r.context["car"], car)
+
+    def test_redirects_to_canonical_url(self):
+        car = make_car()
+        self.assertRedirects(self.client.get(f"/car/{car.pk}/"), car.get_absolute_url(), status_code=301)
+        self.assertRedirects(self.client.get(f"/car/{car.pk}/eski-nom/"), car.get_absolute_url(), status_code=301)
+        self.assertRedirects(self.client.get(f"/car/{car.slug}/"), car.get_absolute_url(), status_code=301)
+        self.assertEqual(self.client.get("/car/999999/").status_code, 404)

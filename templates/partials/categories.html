@@ -1,10 +1,10 @@
 <nav class="brands cats" aria-label="Kategoriyalar" data-i18n-aria="home.categories">
   {% if show_all %}
-  <a class="brand-pill{% if not f.body and not f.fuel %} is-active{% endif %}" href="{% url 'catalog' %}"><span data-i18n="cat.all">Barchasi</span><small>{{ total_for_sale }}</small></a>
+  <a class="brand-pill{% if not f.body and not f.fuel %} is-active{% endif %}" href="{% url 'catalog' %}"><i class="brand-pill__icon" data-icon="grid"></i><span data-i18n="cat.all">Barchasi</span><small>{{ total_for_sale }}</small></a>
   {% endif %}
   {% for c in categories %}
   <a class="brand-pill{% if c.active %} is-active{% endif %}" href="{{ c.url }}"{% if c.active %} aria-current="true"{% endif %}>
-    <span class="brand-pill__icon" aria-hidden="true">{{ c.icon }}</span><span data-i18n="{{ c.i18n }}">{{ c.label }}</span>{% if c.count %}<small>{{ c.count }}</small>{% endif %}
+    <i class="brand-pill__icon" data-icon="{{ c.icon }}"></i><span data-i18n="{{ c.i18n }}">{{ c.label }}</span>{% if c.count %}<small>{{ c.count }}</small>{% endif %}
   </a>
   {% endfor %}
 </nav>

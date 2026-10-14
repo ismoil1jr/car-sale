@@ -365,7 +365,8 @@ body.is-locked { overflow: hidden; }
 .brand-pill small { font-family: var(--font-body); font-size: 12px; color: var(--muted); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-3); }
 
 .brand-pill.is-active { border-color: var(--gold); background: var(--gold-soft); color: var(--gold-light); }
-.brand-pill__icon { font-size: 18px; line-height: 1; }
+.brand-pill__icon { width: 22px; height: 22px; flex: none; color: var(--gold-light); }
+.brand-pill:hover .brand-pill__icon, .brand-pill.is-active .brand-pill__icon { color: var(--gold); }
 .cats { margin-bottom: 18px; }
 .cats-title { font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 12px; }
 

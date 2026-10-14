@@ -20,7 +20,7 @@
     <div>
       <h4 data-i18n="footer.brands">Markalar</h4>
       <ul class="footer__links">
-        <li><a href="{% url 'catalog' %}?fuel=electric">⚡ <span data-i18n="brand.electric">Elektromobillar</span></a></li>
+        <li><a href="{% url 'catalog' %}?fuel=electric"><span data-i18n="brand.electric">Elektromobillar</span></a></li>
         {% for name in FOOTER_BRANDS %}<li><a href="{% url 'catalog' %}?brand={{ name|urlencode }}">{{ name }}</a></li>{% endfor %}
       </ul>
     </div>

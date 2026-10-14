@@ -148,7 +148,7 @@ class Car(models.Model):
         return (not self.is_sold) and (timezone.localdate() - self.posted_at).days <= 7
 
     def get_absolute_url(self):
-        return reverse("car_detail", args=[self.slug])
+        return reverse("car_detail", args=[self.pk, self.slug])
 
     def _make_slug(self):
         base = slugify(f"{self.brand.name} {self.model} {self.trim} {self.year}")[:110] or "car"
