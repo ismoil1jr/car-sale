@@ -5,14 +5,13 @@ from .models import Car
 
 
 def site(request):
-    brands = (
-        Car.objects.exclude(status=Car.Status.SOLD)
-        .values("brand__name").annotate(n=Count("id")).order_by("-n", "brand__name")[:6]
-    )
+    for_sale = Car.objects.exclude(status=Car.Status.SOLD)
+    brands = for_sale.values("brand__name").annotate(n=Count("id")).order_by("-n", "brand__name")
     match = getattr(request, "resolver_match", None)
     return {
         "SITE": settings.SITE,
         "FOOTER_BRANDS": [b["brand__name"] for b in brands],
+        "ELECTRIC_COUNT": for_sale.filter(fuel=Car.Fuel.ELECTRIC).count(),
         "current_page": match.url_name if match else "",
         "NAV": [
             ("home", "/", "nav.home", "Bosh sahifa"),

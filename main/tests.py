@@ -65,3 +65,16 @@ class LeadTests(TestCase):
             "year": "2020", "mileage": "50000", "paint": "clean"})
         self.assertRedirects(r, reverse("sell"))
         self.assertEqual(Lead.objects.get().kind, "sell")
+
+
+class ElectricTests(TestCase):
+    def test_electric_link_and_filter(self):
+        ev = make_car(brand="Zeekr", model="001", fuel="electric")
+        make_car(brand="BYD", model="Song", fuel="electric")
+        make_car(brand="BMW", model="X7", fuel="petrol")
+        home = self.client.get(reverse("home")).content.decode()
+        self.assertIn("?fuel=electric", home)
+        r = self.client.get(reverse("catalog"), {"fuel": "electric"})
+        self.assertEqual({c.brand.name for c in r.context["cars"]}, {"Zeekr", "BYD"})
+        self.assertEqual(r.context["count"], 2)
+        self.assertIn(ev, r.context["cars"])
