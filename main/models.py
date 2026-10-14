@@ -50,6 +50,9 @@ class Car(models.Model):
         SEDAN = "sedan", "Sedan"
         PICKUP = "pickup", "Pikap"
         LIFTBACK = "liftback", "Liftbek"
+        HATCHBACK = "hatchback", "Hetchbek"
+        MINIVAN = "minivan", "Miniven"
+        COUPE = "coupe", "Kupe"
 
     class Fuel(models.TextChoices):
         PETROL = "petrol", "Benzin"

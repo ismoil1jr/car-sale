@@ -33,6 +33,41 @@ def present_choices(qs, field, choices):
 
 
 # --------------------------------------------------------------------------- #
+# Kategoriyalar (Avtoelon/OLX kabi: kuzov turi va yoqilg'i bo'yicha)
+# --------------------------------------------------------------------------- #
+CATEGORIES = [
+    # (kalit, GET parametri, qiymati, uz nomi, i18n kaliti, belgi, doim ko'rsatilsinmi)
+    ("suv", "body", "suv", "SUV / Yoʻltanlamas", "body.suv", "🚙", False),
+    ("sedan", "body", "sedan", "Sedan", "body.sedan", "🚘", False),
+    ("pickup", "body", "pickup", "Pikap", "body.pickup", "🛻", False),
+    ("liftback", "body", "liftback", "Liftbek", "body.liftback", "🚗", False),
+    ("hatchback", "body", "hatchback", "Hetchbek", "body.hatchback", "🚗", False),
+    ("minivan", "body", "minivan", "Miniven", "body.minivan", "🚐", False),
+    ("coupe", "body", "coupe", "Kupe", "body.coupe", "🏎️", False),
+    ("electric", "fuel", "electric", "Elektromobillar", "brand.electric", "⚡", True),
+    ("hybrid", "fuel", "hybrid", "Gibridlar", "cat.hybrid", "🔋", False),
+]
+
+
+def category_links(sale_qs, f=None):
+    """Kategoriya "pill"lari: soni, havolasi va faolligi bilan."""
+    body_counts = dict(sale_qs.values_list("body").annotate(n=Count("id")))
+    fuel_counts = dict(sale_qs.values_list("fuel").annotate(n=Count("id")))
+    active_body = f["body"] if f else []
+    active_fuel = f["fuel"] if f else []
+    only_one = f is not None and len(active_body) + len(active_fuel) == 1
+    items = []
+    for key, param, value, label, i18n, icon, always in CATEGORIES:
+        count = (body_counts if param == "body" else fuel_counts).get(value, 0)
+        if not count and not always:
+            continue
+        active = only_one and value in (active_body if param == "body" else active_fuel)
+        items.append({"key": key, "url": f"/catalog/?{param}={value}", "label": label, "i18n": i18n,
+                      "icon": icon, "count": count, "active": active})
+    return items
+
+
+# --------------------------------------------------------------------------- #
 # Bosh sahifa
 # --------------------------------------------------------------------------- #
 def home(request):
@@ -45,6 +80,7 @@ def home(request):
         "featured": featured,
         "sold_cars": sold[:12],
         "brands": brand_counts(sale),
+        "categories": category_links(sale),
         "body_options": present_choices(sale, "body", Car.Body.choices),
         "price_options": [40000, 60000, 80000, 100000, 150000, 200000],
         "stat_sale": sale.count(),
@@ -197,6 +233,8 @@ def catalog(request):
         "sorts": SORT_LABELS,
         "chips": active_filter_chips(request, f),
         "has_filters": bool(request.GET.keys() - {"sort"}),
+        "categories": category_links(everything.exclude(status=Car.Status.SOLD), f),
+        "total_for_sale": everything.exclude(status=Car.Status.SOLD).count(),
     })
 
 

@@ -364,6 +364,11 @@ body.is-locked { overflow: hidden; }
 .brand-pill:hover { border-color: var(--gold-line); background: var(--surface-2); }
 .brand-pill small { font-family: var(--font-body); font-size: 12px; color: var(--muted); font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-3); }
 
+.brand-pill.is-active { border-color: var(--gold); background: var(--gold-soft); color: var(--gold-light); }
+.brand-pill__icon { font-size: 18px; line-height: 1; }
+.cats { margin-bottom: 18px; }
+.cats-title { font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 12px; }
+
 /* ---------- Feature cards ---------- */
 .features { display: grid; gap: 16px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .features { grid-template-columns: repeat(2, 1fr); } }

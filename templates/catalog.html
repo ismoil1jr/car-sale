@@ -26,6 +26,7 @@
           </aside>
 
           <div>
+            {% include "partials/categories.html" with show_all=True %}
             <div class="toolbar">
               <button class="btn btn--sm filters-btn" type="button" id="open-filters" aria-controls="filter-sheet" aria-expanded="false">
                 <i data-icon="sliders"></i><span data-i18n="filter.title">Filtrlar</span>

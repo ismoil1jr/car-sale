@@ -75,12 +75,19 @@
       </div>
     </section>
 
+    <!-- KATEGORIYALAR -->
+    <section class="section section--tight" aria-labelledby="cats-title" style="padding-bottom:0">
+      <div class="container">
+        <h2 class="cats-title" id="cats-title" data-i18n="home.categories">Kategoriyalar</h2>
+        {% include "partials/categories.html" %}
+      </div>
+    </section>
+
     <!-- MARKALAR -->
     <section class="section section--tight" aria-labelledby="brands-title">
       <div class="container">
-        <h2 class="sr-only" id="brands-title" data-i18n="home.brands">Markalar</h2>
+        <h2 class="cats-title" id="brands-title" data-i18n="home.brands">Markalar</h2>
         <div class="brands" id="brands">
-          <a class="brand-pill" href="{% url 'catalog' %}?fuel=electric">⚡ <span data-i18n="brand.electric">Elektromobillar</span>{% if ELECTRIC_COUNT %}<small>{{ ELECTRIC_COUNT }}</small>{% endif %}</a>
           {% for b in brands %}<a class="brand-pill" href="{% url 'catalog' %}?brand={{ b.name|urlencode }}">{{ b.name }}<small>{{ b.count }}</small></a>{% endfor %}
         </div>
       </div>

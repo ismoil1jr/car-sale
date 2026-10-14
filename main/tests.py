@@ -78,3 +78,17 @@ class ElectricTests(TestCase):
         self.assertEqual({c.brand.name for c in r.context["cars"]}, {"Zeekr", "BYD"})
         self.assertEqual(r.context["count"], 2)
         self.assertIn(ev, r.context["cars"])
+
+
+class CategoryTests(TestCase):
+    def test_category_strip(self):
+        make_car(model="LX", body="suv")
+        make_car(brand="Kia", model="K5", body="sedan")
+        make_car(brand="BYD", model="Seal", body="sedan", fuel="electric")
+        home = self.client.get(reverse("home"))
+        keys = [c["key"] for c in home.context["categories"]]
+        self.assertEqual(keys, ["suv", "sedan", "electric"])  # bo'sh kategoriyalar yashiriladi
+        r = self.client.get(reverse("catalog"), {"body": "sedan"})
+        active = [c["key"] for c in r.context["categories"] if c["active"]]
+        self.assertEqual(active, ["sedan"])
+        self.assertEqual(r.context["count"], 2)
