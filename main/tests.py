@@ -111,3 +111,15 @@ class CarUrlTests(TestCase):
         self.assertRedirects(self.client.get(f"/car/{car.pk}/eski-nom/"), car.get_absolute_url(), status_code=301)
         self.assertRedirects(self.client.get(f"/car/{car.slug}/"), car.get_absolute_url(), status_code=301)
         self.assertEqual(self.client.get("/car/999999/").status_code, 404)
+
+
+class FooterTests(TestCase):
+    def test_footer_shows_categories_not_brands(self):
+        make_car(brand="Lexus", body="suv")
+        make_car(brand="Kia", model="K5", body="sedan")
+        html = self.client.get(reverse("home")).content.decode()
+        footer = html[html.index('<footer'):]
+        self.assertIn("Kategoriyalar", footer)
+        self.assertIn("?body=sedan", footer)
+        self.assertIn("?fuel=electric", footer)
+        self.assertNotIn("?brand=", footer)
