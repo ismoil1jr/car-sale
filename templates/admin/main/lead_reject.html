@@ -1,14 +1,24 @@
 {% extends "admin/base_site.html" %}
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Dashboard</a> › <a href="{% url 'admin:main_selllead_changelist' %}">Sotish arizalari</a> › Rad etish</div>{% endblock %}
+{% block content_title %}Arizani rad etish{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Bosh sahifa</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'admin:main_selllead_changelist' %}">Sotish arizalari</a></li>
+  <li class="breadcrumb-item">Rad etish</li>
+</ol>
+{% endblock %}
 {% block content %}
-<div class="ib-dash">
-  <form method="post" class="ib-panel ib-form">{% csrf_token %}
-    <h3>Arizani rad etish: {{ lead.brand }} {{ lead.model }} {{ lead.year|default_if_none:"" }}</h3>
-    <p class="ib-muted">{{ lead.name }} · {{ lead.phone }}. Rad etilgan ariza «Rad etilgan» filtrida saqlanib qoladi.</p>
-    <div class="ib-field full">{{ form.reason.label_tag }}{{ form.reason }}</div>
-    <div class="ib-form__actions">
-      <button type="submit" class="ib-btn ib-btn--no ib-btn--lg">✕ Rad etish</button>
-      <a class="ib-btn" href="{% url 'admin:main_selllead_changelist' %}">Bekor qilish</a>
+<div class="col-lg-7 col-12">
+  <form method="post" class="card shadow-sm">{% csrf_token %}
+    <div class="card-header"><h5 class="card-title m-0">{{ lead.brand }} {{ lead.model }} {{ lead.year|default_if_none:"" }}</h5></div>
+    <div class="card-body">
+      <p class="text-body-secondary">{{ lead.name }} · {{ lead.phone }}. Rad etilgan ariza oʻchmaydi — «Holati: Rad etilgan» filtrida saqlanadi.</p>
+      <label class="form-label fw-semibold" for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+      {{ form.reason }}
+    </div>
+    <div class="card-footer d-flex gap-2">
+      <button type="submit" class="btn btn-danger"><i class="fas fa-xmark me-1"></i> Rad etish</button>
+      <a class="btn btn-outline-secondary" href="{% url 'admin:main_selllead_changelist' %}">Bekor qilish</a>
     </div>
   </form>
 </div>

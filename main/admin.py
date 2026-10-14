@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from .forms import AcceptLeadForm, RejectLeadForm
-from .models import Brand, Car, CarImage, ContactLead, Feature, Lead, LeadPhoto, SellLead
+from .models import Ad, Brand, Car, CarImage, ContactLead, Feature, Lead, LeadPhoto, SellLead
 
 
 @admin.register(Brand)
@@ -96,7 +96,8 @@ class CarAdmin(admin.ModelAdmin):
 
     @admin.display(description="Sayt")
     def site_link(self, obj):
-        return format_html('<a href="{}" target="_blank">Koʻrish ↗</a>', obj.get_absolute_url())
+        return format_html('<a class="btn btn-sm btn-outline-secondary" href="{}" target="_blank">'
+                           '<i class="fas fa-up-right-from-square"></i></a>', obj.get_absolute_url())
 
 
 class LeadPhotoInline(admin.TabularInline):
@@ -112,15 +113,15 @@ class LeadPhotoInline(admin.TabularInline):
         return "—"
 
 
-STATE_COLORS = {
-    Lead.State.NEW: "#d4a017", Lead.State.PROGRESS: "#3b82f6", Lead.State.ACCEPTED: "#16a34a",
-    Lead.State.REJECTED: "#dc2626", Lead.State.DONE: "#6b7280",
+STATE_BADGES = {
+    Lead.State.NEW: "text-bg-warning", Lead.State.PROGRESS: "text-bg-info", Lead.State.ACCEPTED: "text-bg-success",
+    Lead.State.REJECTED: "text-bg-danger", Lead.State.DONE: "text-bg-secondary",
 }
 
 
 def state_badge(obj):
-    return format_html('<span class="ib-badge" style="--c:{}">{}</span>',
-                       STATE_COLORS.get(obj.state, "#6b7280"), obj.get_state_display())
+    return format_html('<span class="badge rounded-pill {}">{}</span>',
+                       STATE_BADGES.get(obj.state, "text-bg-secondary"), obj.get_state_display())
 
 
 @admin.register(SellLead)
@@ -165,12 +166,12 @@ class SellLeadAdmin(admin.ModelAdmin):
     def buttons(self, obj):
         if obj.state in (Lead.State.ACCEPTED, Lead.State.REJECTED):
             if obj.car_id:
-                return format_html('<a class="ib-btn" href="{}" target="_blank">Saytda koʻrish ↗</a>',
-                                   obj.car.get_absolute_url())
+                return format_html('<a class="btn btn-sm btn-outline-secondary" href="{}" target="_blank">'
+                                   '<i class="fas fa-up-right-from-square"></i> Saytda</a>', obj.car.get_absolute_url())
             return "—"
         return format_html(
-            '<a class="ib-btn ib-btn--ok" href="{}">✓ Qabul qilish</a> '
-            '<a class="ib-btn ib-btn--no" href="{}">✕ Rad etish</a>',
+            '<span class="text-nowrap"><a class="btn btn-sm btn-success" href="{}"><i class="fas fa-check"></i> Qabul</a> '
+            '<a class="btn btn-sm btn-outline-danger" href="{}"><i class="fas fa-xmark"></i> Rad</a></span>',
             reverse("admin:main_selllead_accept", args=[obj.pk]),
             reverse("admin:main_selllead_reject", args=[obj.pk]),
         )
@@ -237,3 +238,43 @@ class ContactLeadAdmin(admin.ModelAdmin):
     @admin.display(description="Xabar")
     def summary(self, obj):
         return (obj.message or "")[:80]
+
+
+@admin.register(Ad)
+class AdAdmin(admin.ModelAdmin):
+    list_display = ("preview", "title", "advertiser", "is_active", "period", "price", "views", "clicks", "ctr_col",
+                    "skips", "order")
+    list_display_links = ("preview", "title")
+    list_editable = ("is_active", "order")
+    list_filter = ("is_active", "starts_on")
+    search_fields = ("title", "advertiser", "link")
+    readonly_fields = ("player", "views", "clicks", "skips", "ctr_col", "created_at")
+    fieldsets = (
+        ("Reklama", {"fields": ("title", "advertiser", "video", "player", "link")}),
+        ("Koʻrsatish", {"fields": ("is_active", ("starts_on", "ends_on"), "order", "price")}),
+        ("Statistika", {"fields": (("views", "clicks", "ctr_col", "skips"), "created_at")}),
+    )
+
+    @admin.display(description="Video")
+    def preview(self, obj):
+        if not obj.video:
+            return "—"
+        return format_html('<video src="{}" muted playsinline preload="metadata" '
+                           'style="height:54px;width:96px;object-fit:cover;border-radius:6px;background:#000"></video>',
+                           obj.video.url)
+
+    @admin.display(description="Koʻrinish")
+    def player(self, obj):
+        if not obj.pk or not obj.video:
+            return "Saqlangandan keyin shu yerda koʻrinadi"
+        return format_html('<video src="{}" controls muted playsinline style="max-height:320px;max-width:100%;'
+                           'border-radius:8px;background:#000"></video>', obj.video.url)
+
+    @admin.display(description="Muddat")
+    def period(self, obj):
+        end = obj.ends_on.strftime("%d.%m.%Y") if obj.ends_on else "muddatsiz"
+        return f"{obj.starts_on:%d.%m.%Y} — {end}"
+
+    @admin.display(description="CTR")
+    def ctr_col(self, obj):
+        return f"{obj.ctr}%"

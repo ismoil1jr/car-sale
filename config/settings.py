@@ -38,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = ['https://inomarkabor.pythonanywhere.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'config.apps.InomarkaAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -162,4 +163,67 @@ SITE = {
     'show_uzs': True,
     # Mijoz mashinasini saytga joylash (reklama) narxi, so'm — qabul qilishda o'zgartirsa bo'ladi
     'ad_fee_default': 300000,
+}
+
+
+# --------------------------------------------------------------------------- #
+# Admin panel (django-jazzmin)
+# --------------------------------------------------------------------------- #
+JAZZMIN_SETTINGS = {
+    'site_title': 'Inomarka Bor',
+    'site_header': 'Inomarka Bor',
+    'site_brand': 'Inomarka Bor',
+    'site_logo': 'img/brand/icon-192.png',
+    'login_logo': 'img/brand/logo.png',
+    'login_logo_dark': 'img/brand/logo.png',
+    'site_logo_classes': 'img-circle',
+    'site_icon': 'img/brand/favicon-32.png',
+    'welcome_sign': 'Boshqaruv paneliga xush kelibsiz',
+    'copyright': 'Inomarka Bor',
+    'search_model': ['main.Car', 'main.SellLead'],
+    'topmenu_links': [
+        {'name': 'Dashboard', 'url': 'admin:index'},
+        {'name': 'Saytni ochish', 'url': '/', 'new_window': True},
+        {'model': 'main.SellLead'},
+        {'model': 'main.Ad'},
+    ],
+    'show_sidebar': True,
+    'navigation_expanded': True,
+    'hide_apps': [],
+    'order_with_respect_to': ['main', 'main.SellLead', 'main.ContactLead', 'main.Car', 'main.Ad', 'main.Brand',
+                              'main.Feature', 'auth'],
+    'icons': {
+        'auth': 'fas fa-users-cog',
+        'auth.user': 'fas fa-user',
+        'auth.Group': 'fas fa-users',
+        'main.Car': 'fas fa-car',
+        'main.Brand': 'fas fa-copyright',
+        'main.Feature': 'fas fa-list-check',
+        'main.SellLead': 'fas fa-file-signature',
+        'main.ContactLead': 'fas fa-envelope-open-text',
+        'main.Ad': 'fas fa-bullhorn',
+    },
+    'default_icon_parents': 'fas fa-folder',
+    'default_icon_children': 'fas fa-circle',
+    'related_modal_active': True,
+    'custom_css': 'css/admin.css',
+    'use_google_fonts_cdn': True,
+    'show_ui_builder': False,
+    'changeform_format': 'horizontal_tabs',
+    'changeform_format_overrides': {'auth.user': 'collapsible', 'auth.group': 'vertical_tabs'},
+}
+JAZZMIN_UI_TWEAKS = {
+    'theme': 'flatly',
+    'default_theme_mode': 'auto',
+    'navbar': 'navbar-white navbar-light',
+    'sidebar': 'sidebar-dark-primary',
+    'accent': 'accent-primary',
+    'sidebar_nav_child_indent': True,
+    'sidebar_nav_flat_style': False,
+    'navbar_fixed': True,
+    'sidebar_fixed': True,
+    'button_classes': {
+        'primary': 'btn-primary', 'secondary': 'btn-outline-secondary', 'info': 'btn-info',
+        'warning': 'btn-warning', 'danger': 'btn-danger', 'success': 'btn-success',
+    },
 }

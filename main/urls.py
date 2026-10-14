@@ -15,4 +15,5 @@ urlpatterns = [
     path("sell/", views.sell, name="sell"),
     path("contact/", views.contact, name="contact"),
     path("about/", views.about, name="about"),
+    path("ads/<int:pk>/<str:event>/", views.ad_event, name="ad_event"),
 ]

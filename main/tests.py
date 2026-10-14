@@ -177,3 +177,73 @@ class AdminReviewTests(TestCase):
         self.assertContains(r, "Reklama tushumi")
         for name in ("main_car", "main_selllead", "main_contactlead"):
             self.assertEqual(self.client.get(reverse(f"admin:{name}_changelist")).status_code, 200, name)
+
+
+class VideoAdTests(TestCase):
+    def make_ad(self, **kw):
+        from datetime import timedelta
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.utils import timezone
+        from .models import Ad
+        defaults = dict(title="Shina markazi", link="https://example.uz", price=500000,
+                        video=SimpleUploadedFile("a.mp4", b"\x00\x00", content_type="video/mp4"))
+        defaults.update(kw)
+        if defaults.pop("expired", False):
+            defaults["ends_on"] = timezone.localdate() - timedelta(days=1)
+        return Ad.objects.create(**defaults)
+
+    def tearDown(self):
+        from .models import Ad
+        for ad in Ad.objects.all():
+            ad.video.delete(save=False)
+
+    def test_running_ads_in_page(self):
+        ad = self.make_ad()
+        self.make_ad(title="Eski", expired=True)
+        self.make_ad(title="Ochiq emas", is_active=False)
+        html = self.client.get(reverse("home")).content.decode()
+        self.assertIn('id="ib-ads"', html)
+        self.assertIn("Shina markazi", html)
+        self.assertNotIn("Eski", html)
+        self.assertNotIn("Ochiq emas", html)
+        self.assertIn("js/ads.js", html)
+
+    def test_no_ads_no_script(self):
+        self.assertNotIn("js/ads.js", self.client.get(reverse("home")).content.decode())
+
+    def test_event_counters(self):
+        ad = self.make_ad()
+        for ev in ("view", "view", "click", "skip"):
+            self.assertEqual(self.client.post(f"/ads/{ad.pk}/{ev}/").status_code, 204)
+        self.assertEqual(self.client.post(f"/ads/{ad.pk}/hack/").status_code, 404)
+        self.assertEqual(self.client.get(f"/ads/{ad.pk}/view/").status_code, 405)
+        ad.refresh_from_db()
+        self.assertEqual((ad.views, ad.clicks, ad.skips, ad.ctr), (2, 1, 1, 50.0))
+
+    def test_ad_price_in_dashboard(self):
+        from django.contrib.auth.models import User
+        self.client.force_login(User.objects.create_superuser("a", "a@a.uz", "p"))
+        self.make_ad(price=700000)
+        r = self.client.get(reverse("admin:index"))
+        kpis = {k["key"]: k for k in r.context["dash"]["kpis"]}
+        self.assertEqual(kpis["ad_income"]["value"], 700000)
+        self.assertEqual(self.client.get(reverse("admin:main_ad_add")).status_code, 200)
+
+
+class MediaRangeTests(TestCase):
+    def test_range_request(self):
+        import os
+        from django.conf import settings
+        path = os.path.join(settings.MEDIA_ROOT, "_range_test.bin")
+        with open(path, "wb") as f:
+            f.write(bytes(range(100)))
+        try:
+            r = self.client.get("/media/_range_test.bin", HTTP_RANGE="bytes=10-19")
+            self.assertEqual(r.status_code, 206)
+            self.assertEqual(r["Content-Range"], "bytes 10-19/100")
+            self.assertEqual(b"".join(r.streaming_content), bytes(range(10, 20)))
+            self.assertEqual(self.client.get("/media/_range_test.bin").status_code, 200)
+            self.assertEqual(self.client.get("/media/_range_test.bin", HTTP_RANGE="bytes=500-").status_code, 416)
+            self.assertEqual(self.client.get("/media/../config/settings.py").status_code, 404)
+        finally:
+            os.remove(path)

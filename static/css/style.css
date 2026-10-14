@@ -826,3 +826,39 @@ body.has-mobile-bar .toasts { bottom: 96px; }
   .header, .footer, .fab, .mobile-bar, .gallery__thumbs, .car-actions { display: none !important; }
   body { background: #fff; color: #000; }
 }
+
+/* ---------- Video reklama ---------- */
+.ad { position: fixed; inset: 0; z-index: 600; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.25s; }
+.ad.is-open { opacity: 1; }
+.ad__stage { position: relative; width: min(100%, 960px); max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px); aspect-ratio: 16 / 9; border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8); transform: scale(0.97); transition: transform 0.25s var(--ease); }
+.ad.is-open .ad__stage { transform: none; }
+.ad__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.ad__hit { position: absolute; inset: 0; z-index: 1; cursor: pointer; }
+.ad__top, .ad__bottom { position: absolute; left: 0; right: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; pointer-events: none; }
+.ad__top { top: 0; background: linear-gradient(rgba(0, 0, 0, 0.55), transparent); }
+.ad__bottom { bottom: 0; padding-bottom: 18px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); align-items: flex-end; }
+.ad__top > *, .ad__bottom > * { pointer-events: auto; }
+.ad__label { padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.16); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.ad__sound { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; }
+.ad__sound svg { width: 20px; height: 20px; }
+.ad__sound:hover { background: rgba(0, 0, 0, 0.75); }
+.ad__cta { display: grid; gap: 4px; min-width: 0; color: #fff; }
+.ad__cta span { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); }
+.ad__cta b { display: inline-flex; align-items: center; gap: 6px; width: max-content; padding: 8px 14px; border-radius: 999px; background: #fff; color: #111; font-size: 13px; }
+.ad__cta b svg { width: 14px; height: 14px; }
+.ad__skip { flex: none; min-height: 44px; padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.35); background: rgba(0, 0, 0, 0.65); color: rgba(255, 255, 255, 0.85); font-weight: 700; font-size: 14px; }
+.ad__skip-text { display: inline-flex; align-items: center; gap: 6px; }
+.ad__skip svg { width: 16px; height: 16px; }
+.ad__skip.is-ready { color: #fff; border-color: #fff; cursor: pointer; }
+.ad__skip.is-ready:hover { background: #fff; color: #111; }
+.ad__skip:disabled { cursor: default; }
+.ad__progress { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; height: 3px; background: rgba(255, 255, 255, 0.2); }
+.ad__progress span { display: block; height: 100%; width: 0; background: var(--gold); transition: width 0.25s linear; }
+@media (max-width: 720px) {
+  .ad { padding: 0; }
+  .ad__stage { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; border-radius: 0; }
+  .ad__top { padding-top: max(14px, env(safe-area-inset-top)); }
+  .ad__bottom { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+  .ad__cta span { max-width: 52vw; }
+}
+@media (prefers-reduced-motion: reduce) { .ad, .ad__stage { transition: none; } }

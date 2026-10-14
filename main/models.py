@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -288,3 +288,44 @@ class ContactLead(Lead):
         proxy = True
         verbose_name = "Murojaat"
         verbose_name_plural = "Murojaatlar"
+
+
+class AdQuerySet(models.QuerySet):
+    def running(self):
+        today = timezone.localdate()
+        return self.filter(is_active=True, starts_on__lte=today).filter(
+            models.Q(ends_on__isnull=True) | models.Q(ends_on__gte=today))
+
+
+class Ad(models.Model):
+    """Video reklama: foydalanuvchi mashinani bosganda ko'rsatiladi (bir tashrifda har biri bir marta)."""
+
+    title = models.CharField("Nomi", max_length=120)
+    advertiser = models.CharField("Reklama beruvchi", max_length=120, blank=True)
+    video = models.FileField("Video (mp4/webm)", upload_to="ads/%Y/%m/",
+                             validators=[FileExtensionValidator(["mp4", "webm", "mov", "m4v"])],
+                             help_text="Tavsiya: mp4 (H.264), 15–30 soniya, 20 MB gacha")
+    link = models.URLField("Havola", max_length=500, help_text="Reklama bosilganda ochiladigan sahifa")
+    price = models.PositiveIntegerField("Reklama narxi, soʻm", default=0)
+    is_active = models.BooleanField("Faol", default=True)
+    starts_on = models.DateField("Boshlanish sanasi", default=timezone.localdate)
+    ends_on = models.DateField("Tugash sanasi", null=True, blank=True, help_text="Boʻsh boʻlsa — muddatsiz")
+    order = models.PositiveSmallIntegerField("Tartib", default=0, help_text="Kichik raqam birinchi chiqadi")
+    views = models.PositiveIntegerField("Koʻrishlar", default=0, editable=False)
+    clicks = models.PositiveIntegerField("Bosishlar", default=0, editable=False)
+    skips = models.PositiveIntegerField("Oʻtkazib yuborilgan", default=0, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = AdQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["order", "-created_at"]
+        verbose_name = "Video reklama"
+        verbose_name_plural = "Video reklamalar"
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def ctr(self):
+        return round(self.clicks * 100 / self.views, 1) if self.views else 0

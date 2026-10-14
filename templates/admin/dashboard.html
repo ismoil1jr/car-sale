@@ -1,128 +1,188 @@
-{% extends "admin/index.html" %}
-{% load car_tags %}
-{% block content %}
-<div class="ib-dash">
+{% extends "admin/base_site.html" %}
+{% load i18n static car_tags %}
 
-  <div class="ib-dash__head">
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block content_title %}Dashboard{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Bosh sahifa</a></li>
+  <li class="breadcrumb-item">Dashboard</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="col-12 ib-dash">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
     <div>
-      <h2>{{ dash.month_name }}</h2>
-      <p>Solishtirish: oʻtgan oy ({{ dash.prev_name }}) va oʻtgan yilning shu oyi ({{ dash.ly_name }})</p>
+      <h4 class="mb-1">{{ dash.month_name }}</h4>
+      <div class="text-body-secondary small">Solishtirish: oʻtgan oy ({{ dash.prev_name }}) va oʻtgan yilning shu oyi ({{ dash.ly_name }})</div>
     </div>
-    <div class="ib-dash__quick">
-      <a class="ib-btn{% if dash.pending_count %} ib-btn--ok{% endif %}" href="{% url 'admin:main_selllead_changelist' %}?state__exact=new">Yangi sotish arizalari: <b>{{ dash.pending_count }}</b></a>
-      <a class="ib-btn" href="{% url 'admin:main_contactlead_changelist' %}?state__exact=new">Yangi murojaatlar: <b>{{ dash.contact_new }}</b></a>
-      <a class="ib-btn" href="{% url 'admin:main_car_add' %}">+ Mashina qoʻshish</a>
-      <a class="ib-btn" href="/" target="_blank">Saytni ochish ↗</a>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn {% if dash.pending_count %}btn-warning{% else %}btn-outline-secondary{% endif %}" href="{% url 'admin:main_selllead_changelist' %}?state__exact=new">
+        <i class="fas fa-file-signature me-1"></i> Yangi arizalar <span class="badge text-bg-light ms-1">{{ dash.pending_count }}</span></a>
+      <a class="btn btn-outline-secondary" href="{% url 'admin:main_contactlead_changelist' %}?state__exact=new">
+        <i class="fas fa-envelope me-1"></i> Murojaatlar <span class="badge text-bg-secondary ms-1">{{ dash.contact_new }}</span></a>
+      <a class="btn btn-primary" href="{% url 'admin:main_car_add' %}"><i class="fas fa-plus me-1"></i> Mashina</a>
+      <a class="btn btn-primary" href="{% url 'admin:main_ad_add' %}"><i class="fas fa-bullhorn me-1"></i> Reklama</a>
     </div>
   </div>
 
-  <!-- KPI kartochkalar -->
-  <div class="ib-kpis">
+  {# --- KPI kartochkalar --- #}
+  <div class="row g-3 mb-3">
     {% for k in dash.kpis %}
-    <div class="ib-kpi">
-      <div class="ib-kpi__title">{{ k.title }}</div>
-      <div class="ib-kpi__value">{% if k.key == "sold_sum" %}{{ k.value|usd }}{% else %}{{ k.value|spaced }}{% if k.money %} <small>soʻm</small>{% endif %}{% endif %}</div>
-      <div class="ib-kpi__unit">{% if not k.money %}{{ k.unit }}{% endif %}</div>
-      <dl class="ib-kpi__cmp">
-        <div>
-          <dt>Oʻtgan oy</dt>
-          <dd>{% if k.key == "sold_sum" %}{{ k.prev|usd }}{% else %}{{ k.prev|spaced }}{% endif %}
-            <span class="ib-delta ib-delta--{{ k.vs_prev.dir }}">{% if k.vs_prev.dir == "up" %}▲{% elif k.vs_prev.dir == "down" %}▼{% else %}●{% endif %} {% if k.vs_prev.pct is not None %}{{ k.vs_prev.pct }}%{% elif k.vs_prev.dir == "up" %}yangi{% else %}oʻzgarmadi{% endif %}</span></dd>
+    <div class="col-xl col-md-4 col-sm-6">
+      <div class="card h-100 shadow-sm ib-kpi ib-kpi--{{ k.key }}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="text-uppercase small fw-semibold text-body-secondary">{{ k.title }}</div>
+            <span class="ib-kpi__icon"><i class="fas {% if k.key == 'sold' %}fa-handshake{% elif k.key == 'sold_sum' %}fa-sack-dollar{% elif k.key == 'ads' %}fa-bullhorn{% elif k.key == 'ad_income' %}fa-coins{% else %}fa-inbox{% endif %}"></i></span>
+          </div>
+          <div class="fs-3 fw-bold mt-1">{% if k.key == "sold_sum" %}{{ k.value|usd }}{% else %}{{ k.value|spaced }}{% if k.money %} <small class="fs-6 fw-semibold text-body-secondary">soʻm</small>{% endif %}{% endif %}</div>
+          <div class="small text-body-secondary">{% if not k.money %}{{ k.unit }}{% else %}&nbsp;{% endif %}</div>
+          <hr class="my-2">
+          {% for label, val, ch in k.cmp %}
+          <div class="d-flex justify-content-between small">
+            <span class="text-body-secondary">{{ label }}: {% if k.key == "sold_sum" %}{{ val|usd }}{% else %}{{ val|spaced }}{% endif %}</span>
+            <span class="fw-semibold {% if ch.dir == 'up' %}text-success{% elif ch.dir == 'down' %}text-danger{% else %}text-body-secondary{% endif %}">
+              <i class="fas {% if ch.dir == 'up' %}fa-arrow-trend-up{% elif ch.dir == 'down' %}fa-arrow-trend-down{% else %}fa-minus{% endif %}"></i>
+              {% if ch.pct is not None %}{{ ch.pct }}%{% elif ch.dir == 'up' %}yangi{% else %}0%{% endif %}
+            </span>
+          </div>
+          {% endfor %}
         </div>
-        <div>
-          <dt>Oʻtgan yil</dt>
-          <dd>{% if k.key == "sold_sum" %}{{ k.ly|usd }}{% else %}{{ k.ly|spaced }}{% endif %}
-            <span class="ib-delta ib-delta--{{ k.vs_ly.dir }}">{% if k.vs_ly.dir == "up" %}▲{% elif k.vs_ly.dir == "down" %}▼{% else %}●{% endif %} {% if k.vs_ly.pct is not None %}{{ k.vs_ly.pct }}%{% elif k.vs_ly.dir == "up" %}yangi{% else %}oʻzgarmadi{% endif %}</span></dd>
-        </div>
-      </dl>
+      </div>
     </div>
     {% endfor %}
   </div>
 
-  <!-- 12 oylik grafiklar (har biri bitta o'q, bitta ko'rsatkich) -->
-  <div class="ib-charts">
-    <section class="ib-panel">
-      <h3>Baraka boʻldi — oxirgi 12 oy <small>sotilgan mashinalar soni</small></h3>
-      <div class="ib-bars" role="img" aria-label="Oylar boʻyicha sotilgan mashinalar soni">
-        {% for r in dash.series %}
-        <div class="ib-bar{% if r.current %} is-current{% endif %}" data-tip="{{ r.title }}: {{ r.sold }} ta">
-          <span class="ib-bar__val">{% if r.current or r.sold_h == 100.0 %}{{ r.sold }}{% endif %}</span>
-          <span class="ib-bar__fill" style="height:{{ r.sold_h|stringformat:'s' }}%"></span>
-          <span class="ib-bar__label">{{ r.label }}</span>
-        </div>
-        {% endfor %}
+  {# --- Grafiklar: har biri bitta ko'rsatkich, bitta o'q --- #}
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header"><h5 class="card-title m-0"><i class="fas fa-handshake me-2 text-body-secondary"></i>Baraka boʻldi — oxirgi 12 oy</h5></div>
+        <div class="card-body"><div class="ib-chart"><canvas id="chart-sold" aria-label="Oylar boʻyicha sotilgan mashinalar soni" role="img"></canvas></div></div>
       </div>
-    </section>
-    <section class="ib-panel">
-      <h3>Reklama tushumi — oxirgi 12 oy <small>soʻm</small></h3>
-      <div class="ib-bars" role="img" aria-label="Oylar boʻyicha reklama tushumi">
-        {% for r in dash.series %}
-        <div class="ib-bar{% if r.current %} is-current{% endif %}" data-tip="{{ r.title }}: {{ r.ad_income|spaced }} soʻm">
-          <span class="ib-bar__val">{% if r.current or r.ad_income_h == 100.0 %}{{ r.ad_income|spaced }}{% endif %}</span>
-          <span class="ib-bar__fill" style="height:{{ r.ad_income_h|stringformat:'s' }}%"></span>
-          <span class="ib-bar__label">{{ r.label }}</span>
-        </div>
-        {% endfor %}
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header"><h5 class="card-title m-0"><i class="fas fa-coins me-2 text-body-secondary"></i>Reklama tushumi — oxirgi 12 oy, soʻm</h5></div>
+        <div class="card-body"><div class="ib-chart"><canvas id="chart-ads" aria-label="Oylar boʻyicha reklama tushumi" role="img"></canvas></div></div>
       </div>
-    </section>
+    </div>
   </div>
-  <details class="ib-panel ib-table-view">
-    <summary>Jadval koʻrinishi</summary>
-    <table>
-      <thead><tr><th>Oy</th><th>Baraka boʻldi</th><th>Reklama tushumi, soʻm</th></tr></thead>
-      <tbody>{% for r in dash.series %}<tr><td>{{ r.title }}</td><td>{{ r.sold }}</td><td>{{ r.ad_income|spaced }}</td></tr>{% endfor %}</tbody>
-    </table>
-  </details>
 
-  <div class="ib-grid2">
-    <!-- Yillik solishtirish -->
-    <section class="ib-panel">
-      <h3>{{ dash.year }}-yil — oʻtgan yilning shu davri bilan</h3>
-      <table class="ib-table">
-        <thead><tr><th></th><th>{{ dash.year }}</th><th>{{ dash.year|add:"-1" }}</th><th>Oʻzgarish</th></tr></thead>
-        <tbody>
-          {% for r in dash.year_rows %}
-          <tr>
-            <th>{{ r.title }}</th>
-            <td>{% if r.money and r.title == "Sotuvlar summasi" %}{{ r.cur|usd }}{% else %}{{ r.cur|spaced }}{% endif %}</td>
-            <td>{% if r.money and r.title == "Sotuvlar summasi" %}{{ r.prev|usd }}{% else %}{{ r.prev|spaced }}{% endif %}</td>
-            <td><span class="ib-delta ib-delta--{{ r.change.dir }}">{% if r.change.dir == "up" %}▲{% elif r.change.dir == "down" %}▼{% else %}●{% endif %} {% if r.change.pct is not None %}{{ r.change.pct }}%{% else %}—{% endif %}</span></td>
-          </tr>
+  <div class="row g-3 mb-3">
+    {# --- Yillik solishtirish --- #}
+    <div class="col-lg-5">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header"><h5 class="card-title m-0">{{ dash.year }}-yil va oʻtgan yilning shu davri</h5></div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-hover mb-0 align-middle">
+            <thead><tr><th class="ps-3"></th><th class="text-end">{{ dash.year }}</th><th class="text-end">{{ dash.year|add:"-1" }}</th><th class="text-end pe-3">Oʻzgarish</th></tr></thead>
+            <tbody>
+            {% for r in dash.year_rows %}
+              <tr>
+                <th class="ps-3 fw-normal">{{ r.title }}</th>
+                <td class="text-end">{% if r.title == "Sotuvlar summasi" %}{{ r.cur|usd }}{% else %}{{ r.cur|spaced }}{% endif %}</td>
+                <td class="text-end">{% if r.title == "Sotuvlar summasi" %}{{ r.prev|usd }}{% else %}{{ r.prev|spaced }}{% endif %}</td>
+                <td class="text-end pe-3 fw-semibold {% if r.change.dir == 'up' %}text-success{% elif r.change.dir == 'down' %}text-danger{% else %}text-body-secondary{% endif %}">
+                  <i class="fas {% if r.change.dir == 'up' %}fa-arrow-up{% elif r.change.dir == 'down' %}fa-arrow-down{% else %}fa-minus{% endif %}"></i>
+                  {% if r.change.pct is not None %}{{ r.change.pct }}%{% else %}—{% endif %}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer small text-body-secondary">
+          Hozir sotuvda: <b>{{ dash.for_sale }}</b> · Bron qilingan: <b>{{ dash.reserved }}</b>
+        </div>
+      </div>
+    </div>
+
+    {# --- Ko'rib chiqilmagan arizalar --- #}
+    <div class="col-lg-7">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title m-0">Koʻrib chiqilmagan sotish arizalari</h5>
+          <a class="small" href="{% url 'admin:main_selllead_changelist' %}">Hammasi →</a>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for l in dash.pending %}
+          <li class="list-group-item d-flex align-items-center gap-3">
+            {% with photo=l.photos.all.0 %}{% if photo %}<img class="ib-thumb" src="{{ photo.image.url }}" alt="">{% else %}<span class="ib-thumb ib-thumb--empty"><i class="fas fa-car"></i></span>{% endif %}{% endwith %}
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-semibold">{{ l.brand }} {{ l.model }} {{ l.year|default_if_none:"" }}</div>
+              <div class="small text-body-secondary">{{ l.name }} · {{ l.phone }}{% if l.budget %} · {{ l.budget|usd }}{% endif %} · {{ l.created_at|date:"d.m H:i" }}</div>
+            </div>
+            <a class="btn btn-sm btn-success" href="{% url 'admin:main_selllead_accept' l.pk %}"><i class="fas fa-check"></i> Qabul</a>
+            <a class="btn btn-sm btn-outline-danger" href="{% url 'admin:main_selllead_reject' l.pk %}"><i class="fas fa-xmark"></i> Rad</a>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-body-secondary"><i class="fas fa-circle-check text-success me-1"></i> Hamma arizalar koʻrib chiqilgan</li>
           {% endfor %}
-        </tbody>
-      </table>
-      <p class="ib-muted">Hozir sotuvda: <b>{{ dash.for_sale }}</b> · Bron qilingan: <b>{{ dash.reserved }}</b></p>
-    </section>
-
-    <!-- Ko'rib chiqilishi kerak bo'lgan arizalar -->
-    <section class="ib-panel">
-      <h3>Koʻrib chiqilmagan sotish arizalari <small>{{ dash.pending_count }} ta</small></h3>
-      {% if dash.pending %}
-      <ul class="ib-list">
-        {% for l in dash.pending %}
-        <li>
-          {% with photo=l.photos.all.0 %}{% if photo %}<img src="{{ photo.image.url }}" alt="">{% else %}<span class="ib-noimg">—</span>{% endif %}{% endwith %}
-          <div>
-            <b>{{ l.brand }} {{ l.model }} {{ l.year|default_if_none:"" }}</b>
-            <span>{{ l.name }} · {{ l.phone }}{% if l.budget %} · {{ l.budget|usd }}{% endif %}</span>
-          </div>
-          <span class="ib-list__actions">
-            <a class="ib-btn ib-btn--ok" href="{% url 'admin:main_selllead_accept' l.pk %}">✓ Qabul</a>
-            <a class="ib-btn ib-btn--no" href="{% url 'admin:main_selllead_reject' l.pk %}">✕ Rad</a>
-          </span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="ib-muted">Hamma arizalar koʻrib chiqilgan.</p>
-      {% endif %}
-      <h3 style="margin-top:18px">Oxirgi sotuvlar</h3>
-      <ul class="ib-list ib-list--plain">
-        {% for c in dash.recent_sold %}<li><div><b>{{ c.title }} {{ c.year }}</b><span>{{ c.price|usd }} · {{ c.sold_at|date:"d.m.Y" }}</span></div></li>{% empty %}<li class="ib-muted">Hali sotuv yoʻq</li>{% endfor %}
-      </ul>
-    </section>
+        </ul>
+      </div>
+    </div>
   </div>
+
+  <div class="row g-3 mb-3">
+    {# --- Video reklamalar statistikasi --- #}
+    <div class="col-lg-7">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title m-0">Video reklamalar</h5>
+          <a class="small" href="{% url 'admin:main_ad_changelist' %}">Boshqarish →</a>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-hover mb-0 align-middle">
+            <thead><tr><th class="ps-3">Reklama</th><th>Holat</th><th class="text-end">Koʻrishlar</th><th class="text-end">Bosishlar</th><th class="text-end">CTR</th><th class="text-end pe-3">Narxi</th></tr></thead>
+            <tbody>
+            {% for ad in dash.video_ads %}
+              <tr>
+                <td class="ps-3"><a href="{% url 'admin:main_ad_change' ad.pk %}">{{ ad.title }}</a></td>
+                <td>{% if ad.is_active %}<span class="badge text-bg-success">Faol</span>{% else %}<span class="badge text-bg-secondary">Toʻxtatilgan</span>{% endif %}</td>
+                <td class="text-end">{{ ad.views|spaced }}</td>
+                <td class="text-end">{{ ad.clicks|spaced }}</td>
+                <td class="text-end">{{ ad.ctr }}%</td>
+                <td class="text-end pe-3">{{ ad.price|spaced }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="ps-3 text-body-secondary">Hali reklama qoʻshilmagan. <a href="{% url 'admin:main_ad_add' %}">Qoʻshish</a></td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {# --- Oxirgi sotuvlar --- #}
+    <div class="col-lg-5">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header"><h5 class="card-title m-0">Oxirgi sotuvlar</h5></div>
+        <ul class="list-group list-group-flush">
+          {% for c in dash.recent_sold %}
+          <li class="list-group-item d-flex justify-content-between"><span>{{ c.title }} {{ c.year }}</span><span class="text-body-secondary">{{ c.price|usd }} · {{ c.sold_at|date:"d.m.Y" }}</span></li>
+          {% empty %}<li class="list-group-item text-body-secondary">Hali sotuv yoʻq</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <details class="card shadow-sm mb-3">
+    <summary class="card-header">Oylik jadval (grafik maʼlumotlari)</summary>
+    <div class="card-body p-0">
+      <table class="table table-sm mb-0">
+        <thead><tr><th class="ps-3">Oy</th><th class="text-end">Baraka boʻldi</th><th class="text-end pe-3">Reklama tushumi, soʻm</th></tr></thead>
+        <tbody>{% for r in dash.series %}<tr><td class="ps-3">{{ r.title }}</td><td class="text-end">{{ r.sold }}</td><td class="text-end pe-3">{{ r.ad_income|spaced }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </details>
 </div>
-{{ block.super }}
+{{ dash.chart|json_script:"ib-chart-data" }}
 {% endblock %}
-{% block sidebar %}{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{% static 'js/admin-dashboard.js' %}"></script>
+{% endblock %}

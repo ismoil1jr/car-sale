@@ -1,34 +1,65 @@
 {% extends "admin/base_site.html" %}
 {% load car_tags %}
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Dashboard</a> › <a href="{% url 'admin:main_selllead_changelist' %}">Sotish arizalari</a> › Qabul qilish</div>{% endblock %}
+{% block content_title %}Arizani qabul qilish{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Bosh sahifa</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'admin:main_selllead_changelist' %}">Sotish arizalari</a></li>
+  <li class="breadcrumb-item">Qabul qilish</li>
+</ol>
+{% endblock %}
 {% block content %}
-<div class="ib-dash">
-  <section class="ib-panel">
-    <h3>Ariza: {{ lead.brand }} {{ lead.model }} {{ lead.year|default_if_none:"" }}</h3>
-    <p class="ib-muted">{{ lead.name }} · {{ lead.phone }} · {{ lead.created_at|date:"d.m.Y H:i" }}{% if lead.budget %} · kutilayotgan narx {{ lead.budget|usd }}{% endif %}</p>
-    {% if lead.message %}<p>{{ lead.message|linebreaksbr }}</p>{% endif %}
-    {% if lead.photos.all %}<div class="ib-photos">{% for p in lead.photos.all %}<a href="{{ p.image.url }}" target="_blank"><img src="{{ p.image.url }}" alt=""></a>{% endfor %}</div>
-    <p class="ib-muted">Bu rasmlar eʼlonga avtomatik qoʻshiladi.</p>{% else %}<p class="ib-muted">Arizada rasm yoʻq — qabul qilgandan keyin mashina sahifasidan rasm qoʻshing.</p>{% endif %}
-  </section>
-
-  <form method="post" class="ib-panel ib-form">{% csrf_token %}
-    <h3>Saytga chiqadigan eʼlon</h3>
-    <p class="ib-muted">Maʼlumotlar arizadan olindi. Tekshiring, kerak boʻlsa toʻldiring va «Qabul qilish» ni bosing — eʼlon darhol saytda chiqadi.</p>
-    {% if form.errors %}<p class="errornote">Belgilangan maydonlarni tekshiring.</p>{% endif %}
-    <div class="ib-form__grid">
-      {% for field in form %}
-      <div class="ib-field{% if field.errors %} has-error{% endif %}{% if field.name == 'description_uz' or field.name == 'description_ru' %} full{% endif %}">
-        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-        {{ field }}
-        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-        {{ field.errors }}
+<div class="col-12">
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="card-title m-0">Ariza</h5></div>
+        <div class="card-body">
+          <div class="fs-5 fw-semibold">{{ lead.brand }} {{ lead.model }} {{ lead.year|default_if_none:"" }}</div>
+          <dl class="row small mt-2 mb-0">
+            <dt class="col-5">Mijoz</dt><dd class="col-7">{{ lead.name }}</dd>
+            <dt class="col-5">Telefon</dt><dd class="col-7"><a href="tel:{{ lead.phone }}">{{ lead.phone }}</a></dd>
+            <dt class="col-5">Probeg</dt><dd class="col-7">{{ lead.mileage|default_if_none:0|spaced }} km</dd>
+            <dt class="col-5">Narx</dt><dd class="col-7">{% if lead.budget %}{{ lead.budget|usd }}{% else %}—{% endif %}</dd>
+            <dt class="col-5">Kelgan</dt><dd class="col-7">{{ lead.created_at|date:"d.m.Y H:i" }}</dd>
+          </dl>
+          {% if lead.message %}<p class="mt-2 mb-0">{{ lead.message|linebreaksbr }}</p>{% endif %}
+        </div>
+        <div class="card-footer">
+          {% if lead.photos.all %}
+          <div class="ib-photos">{% for p in lead.photos.all %}<a href="{{ p.image.url }}" target="_blank"><img src="{{ p.image.url }}" alt=""></a>{% endfor %}</div>
+          <div class="small text-body-secondary mt-2">Rasmlar eʼlonga avtomatik qoʻshiladi.</div>
+          {% else %}<div class="small text-body-secondary">Arizada rasm yoʻq — qabul qilgandan keyin mashina sahifasidan qoʻshing.</div>{% endif %}
+        </div>
       </div>
-      {% endfor %}
     </div>
-    <div class="ib-form__actions">
-      <button type="submit" class="ib-btn ib-btn--ok ib-btn--lg">✓ Qabul qilish va saytga chiqarish</button>
-      <a class="ib-btn" href="{% url 'admin:main_selllead_changelist' %}">Bekor qilish</a>
+    <div class="col-lg-8">
+      <form method="post" class="card shadow-sm">{% csrf_token %}
+        <div class="card-header"><h5 class="card-title m-0">Saytga chiqadigan eʼlon</h5></div>
+        <div class="card-body">
+          <p class="text-body-secondary">Maʼlumotlar arizadan olindi. Tekshiring, kuzov/yoqilgʻi/privodni tanlang — «Qabul qilish» bosilganda eʼlon darhol saytda chiqadi.</p>
+          {% if form.errors %}<div class="alert alert-danger">Belgilangan maydonlarni tekshiring.</div>{% endif %}
+          <div class="row g-3">
+            {% for field in form %}
+            <div class="{% if field.name == 'description_uz' or field.name == 'description_ru' %}col-12{% else %}col-md-4 col-sm-6{% endif %}">
+              {% if field.field.widget.input_type == "checkbox" %}
+              <div class="form-check mt-4">{{ field }} <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+              {% else %}
+              <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+              {{ field }}
+              {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+              {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="card-footer d-flex gap-2">
+          <button type="submit" class="btn btn-success"><i class="fas fa-check me-1"></i> Qabul qilish va saytga chiqarish</button>
+          <a class="btn btn-outline-secondary" href="{% url 'admin:main_selllead_changelist' %}">Bekor qilish</a>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </div>
 {% endblock %}

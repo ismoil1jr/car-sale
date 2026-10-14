@@ -119,6 +119,8 @@
 
   /* Ikonlar (inline SVG) */
   var ICONS = {
+    volume: '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
+    volumeX: '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m22 9-6 6M16 9l6 6"/>',
     carSedan: '<path d="M2.5 16.5V13l3-1.2 3-3.3h6.5l3.3 3.3 3.2.9v3.8"/><path d="M8.2 11.8h10.3"/><circle cx="6.5" cy="16.5" r="2"/><circle cx="17.5" cy="16.5" r="2"/><path d="M2.5 16.5h2M8.5 16.5h7M19.5 16.5h2"/>',
     carSuv: '<path d="M2.5 16.5v-5l2-.8 1.6-4.2h11.2l2.7 4.4 1.5.6v5"/><path d="M4.6 10.7h15.2M12 6.5v4.2"/><circle cx="6.5" cy="16.5" r="2"/><circle cx="17.5" cy="16.5" r="2"/><path d="M2.5 16.5h2M8.5 16.5h7M19.5 16.5h2"/>',
     carPickup: '<path d="M2.5 16.5v-4h8.2V8h4.8l3 4.2 3 .6v3.7"/><path d="M10.7 12.5h7.8"/><circle cx="6.5" cy="16.5" r="2"/><circle cx="17.5" cy="16.5" r="2"/><path d="M2.5 16.5h2M8.5 16.5h7M19.5 16.5h2"/>',

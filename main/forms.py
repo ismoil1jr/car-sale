@@ -68,6 +68,18 @@ class AcceptLeadForm(forms.ModelForm):
 
     field_order = ["brand_name"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Bootstrap (Jazzmin) ko'rinishi
+        for field in self.fields.values():
+            w = field.widget
+            if isinstance(w, forms.CheckboxInput):
+                w.attrs["class"] = "form-check-input"
+            elif isinstance(w, forms.Select):
+                w.attrs["class"] = "form-select"
+            else:
+                w.attrs["class"] = "form-control"
+
     @classmethod
     def initial_from(cls, lead, ad_fee):
         return {
@@ -92,4 +104,4 @@ class AcceptLeadForm(forms.ModelForm):
 
 class RejectLeadForm(forms.Form):
     reason = forms.CharField(label="Rad etish sababi (ixtiyoriy)", required=False,
-                             widget=forms.Textarea(attrs={"rows": 3}))
+                             widget=forms.Textarea(attrs={"rows": 3, "class": "form-control"}))

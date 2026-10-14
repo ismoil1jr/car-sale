@@ -1,13 +1,15 @@
 from django.contrib import messages
 from django.db.models import Count, Max, Min, Q
-from django.http import JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_GET
+from django.db.models import F
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
 from .forms import ContactForm, SellForm
-from .models import Brand, Car, Lead, LeadPhoto
+from .models import Ad, Brand, Car, Lead, LeadPhoto
 
 MAX_PHOTOS = 15
 MAX_PHOTO_SIZE = 8 * 1024 * 1024
@@ -380,6 +382,19 @@ def about(request):
     return render(request, "about.html", {
         "stat_sold": Car.objects.filter(status=Car.Status.SOLD).count(),
     })
+
+
+AD_EVENTS = {"view": "views", "click": "clicks", "skip": "skips"}
+
+
+@csrf_exempt  # navigator.sendBeacon CSRF token yubora olmaydi; faqat hisoblagich oshiriladi
+@require_POST
+def ad_event(request, pk, event):
+    field = AD_EVENTS.get(event)
+    if not field:
+        raise Http404
+    Ad.objects.filter(pk=pk).update(**{field: F(field) + 1})
+    return HttpResponse(status=204)
 
 
 def not_found(request, exception=None):

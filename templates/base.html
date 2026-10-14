@@ -31,6 +31,10 @@
 
   <script src="{% static 'js/i18n.js' %}"></script>
   <script src="{% static 'js/core.js' %}"></script>
+  {% if ADS %}
+  {{ ADS|json_script:"ib-ads" }}
+  <script src="{% static 'js/ads.js' %}" data-event-url="/ads/0/EVENT/"></script>
+  {% endif %}
   {% block scripts %}{% endblock %}
 </body>
 </html>
