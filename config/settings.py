@@ -27,7 +27,9 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
+# PythonAnywhere'da (PYTHONANYWHERE_DOMAIN bor) standart holatda DEBUG o'chiq, lokalda yoqiq
+ON_PYTHONANYWHERE = 'PYTHONANYWHERE_DOMAIN' in os.environ
+DEBUG = os.environ.get('DJANGO_DEBUG', '0' if ON_PYTHONANYWHERE else '1') == '1'
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'inomarkabor.pythonanywhere.com']
 CSRF_TRUSTED_ORIGINS = ['https://inomarkabor.pythonanywhere.com']
