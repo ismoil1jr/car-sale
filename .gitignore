@@ -8,3 +8,10 @@ __pycache__/
 db.sqlite3
 staticfiles/
 media/leads/
+
+# Admin/sayt orqali yuklangan fayllar git'ga tushmasin (faqat demo rasmlar repoda)
+media/*
+!media/cars/
+media/cars/*
+!media/cars/*-[0-9].webp
+!media/cars/*-[0-9]-sm.webp
