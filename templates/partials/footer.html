@@ -1,0 +1,41 @@
+{% load static %}
+<footer class="footer">
+  <div class="container footer__top">
+    <div class="footer__brand">
+      <img src="{% static 'img/brand/logo.png' %}" alt="{{ SITE.brand }}" width="710" height="221" loading="lazy">
+      <p data-i18n="footer.about" data-years="{{ SITE.experience_years }}">Toshkentdagi premium avtomobillar boʻyicha auto blog va savdo. {{ SITE.experience_years }} yillik tajriba, halol maʼlumot va ochiq narx.</p>
+      <div class="socials">
+        <a href="https://www.instagram.com/{{ SITE.instagram }}/" target="_blank" rel="noopener" aria-label="Instagram"><i data-icon="instagram"></i></a>
+        <a href="https://t.me/{{ SITE.telegram_channel }}" target="_blank" rel="noopener" aria-label="Telegram kanal" data-i18n-aria="social.tgChannel"><i data-icon="telegram"></i></a>
+        <a href="tel:{{ SITE.phones.0.number }}" aria-label="Qoʻngʻiroq qilish" data-i18n-aria="cta.call"><i data-icon="phone"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4 data-i18n="footer.menu">Menyu</h4>
+      <ul class="footer__links">
+        {% for page, href, key, label in NAV %}<li><a href="{{ href }}" data-i18n="{{ key }}">{{ label }}</a></li>{% endfor %}
+        <li><a href="{% url 'favorites' %}" data-i18n="nav.favorites">Saqlanganlar</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="footer.brands">Markalar</h4>
+      <ul class="footer__links">
+        {% for name in FOOTER_BRANDS %}<li><a href="{% url 'catalog' %}?brand={{ name|urlencode }}">{{ name }}</a></li>{% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="footer.contacts">Aloqa</h4>
+      <ul class="footer__links">
+        {% for p in SITE.phones %}<li><a href="tel:{{ p.number }}">{{ p.display }}</a></li>{% endfor %}
+        <li><a href="https://t.me/{{ SITE.telegram_personal }}" target="_blank" rel="noopener">@{{ SITE.telegram_personal }}</a></li>
+        <li><a href="https://www.instagram.com/{{ SITE.instagram }}/" target="_blank" rel="noopener">@{{ SITE.instagram }}</a></li>
+        <li><span data-l="uz">{{ SITE.work_hours_uz }}</span><span data-l="ru" hidden>{{ SITE.work_hours_ru }}</span></li>
+        <li><span data-l="uz">{{ SITE.city_uz }}</span><span data-l="ru" hidden>{{ SITE.city_ru }}</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer__bottom">
+    <span>© {% now "Y" %} {{ SITE.brand }}. <span data-i18n="footer.rights">Barcha huquqlar himoyalangan.</span></span>
+    {% if user.is_staff %}<span class="demo-note"><a href="{% url 'admin:index' %}" data-i18n="footer.admin">Boshqaruv paneli</a></span>{% endif %}
+  </div>
+</footer>

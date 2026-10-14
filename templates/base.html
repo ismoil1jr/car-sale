@@ -1,0 +1,36 @@
+{% load static %}<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title{% block title_attrs %}{% endblock %}>{% block title %}Inomarka Bor — Premium avtomobillar{% endblock %}</title>
+  {% block meta %}{% endblock %}
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#09090a">
+  {% block og %}<meta property="og:image" content="{% static 'img/brand/og-image.jpg' %}">{% endblock %}
+  <link rel="icon" href="{% static 'img/brand/favicon.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'img/brand/favicon-32.png' %}" sizes="32x32">
+  <link rel="apple-touch-icon" href="{% static 'img/brand/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body data-page="{% block page %}{% endblock %}" data-tg="{{ SITE.telegram_personal }}">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">Asosiy kontentga oʻtish</a>
+  {% include "partials/header.html" %}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/footer.html" %}
+  {% if not hide_fab %}{% include "partials/fab.html" %}{% endif %}
+
+  <script src="{% static 'js/i18n.js' %}"></script>
+  <script src="{% static 'js/core.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

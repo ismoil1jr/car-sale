@@ -3,3 +3,8 @@ Thumbs.db
 node_modules/
 .netlify/
 *.log
+.venv/
+__pycache__/
+db.sqlite3
+staticfiles/
+media/leads/

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title_attrs %} data-i18n="meta.contactTitle"{% endblock %}
+{% block title %}Aloqa — Inomarka Bor{% endblock %}
+{% block page %}contact{% endblock %}
+{% block content %}
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.contact">Aloqa</span>
+        </nav>
+        <h1 data-i18n="contact.title">Biz bilan bogʻlaning</h1>
+        <p data-i18n="contact.sub">Savolingiz bormi yoki mashina tanlashda yordam kerakmi? Qulay usulni tanlang — tez javob beramiz.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="contact-grid" id="contact-cards">
+          {% for p in SITE.phones %}
+          <a class="contact-card reveal{% if forloop.counter0 %} reveal-delay-{{ forloop.counter0 }}{% endif %}" href="tel:{{ p.number }}">
+            <div class="feature__icon"><i data-icon="phone"></i></div><small><span data-l="uz">{{ p.label_uz }}</span><span data-l="ru" hidden>{{ p.label_ru }}</span></small><b>{{ p.display }}</b></a>
+          {% endfor %}
+          <a class="contact-card reveal reveal-delay-2" href="https://t.me/{{ SITE.telegram_personal }}" target="_blank" rel="noopener">
+            <div class="feature__icon"><i data-icon="telegram"></i></div><small data-i18n="contact.tgPersonal">Telegram (shaxsiy)</small><b>@{{ SITE.telegram_personal }}</b></a>
+          <a class="contact-card reveal reveal-delay-3" href="https://www.instagram.com/{{ SITE.instagram }}/" target="_blank" rel="noopener">
+            <div class="feature__icon"><i data-icon="instagram"></i></div><small>Instagram</small><b>@{{ SITE.instagram }}</b></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container form-layout">
+        <form class="form" method="post" action="{% url 'contact' %}" data-lead-form novalidate>
+          {% csrf_token %}{% if prefill_car %}<input type="hidden" name="car" value="{{ prefill_car.slug }}">{% endif %}
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num"><i data-icon="message"></i></span><span data-i18n="contact.formTitle">Murojaat qoldiring</span></h2>
+            <div class="form-grid">
+              <fieldset class="field full" style="border:0;padding:0;margin:0">
+                <legend class="label" style="margin-bottom:8px" data-i18n="contact.type">Murojaat turi</legend>
+                <div class="radio-cards">
+                  {% for value, label in kinds %}
+                  <label class="radio-card"><input type="radio" name="kind" value="{{ value }}"{% if selected_kind == value %} checked{% endif %}><span>
+                    <i data-icon="{% if value == 'buy' %}car{% elif value == 'find' %}search{% elif value == 'ads' %}megaphone{% else %}message{% endif %}"></i>
+                    <span data-i18n="contact.type{% if value == 'buy' %}Buy{% elif value == 'find' %}Find{% elif value == 'ads' %}Ads{% else %}Other{% endif %}">{{ label }}</span></span></label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+              <div class="field{% if form.name.errors %} has-error{% endif %}">
+                <label for="c-name"><span data-i18n="form.name">Ismingiz</span> <span class="req">*</span></label>
+                <input class="input" id="c-name" name="name" value="{{ form.name.value|default_if_none:'' }}" required autocomplete="name" placeholder="Ism" data-i18n-placeholder="form.namePh">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field{% if form.phone.errors %} has-error{% endif %}">
+                <label for="c-phone"><span data-i18n="form.phone">Telefon raqam</span> <span class="req">*</span></label>
+                <input class="input" id="c-phone" name="phone" type="tel" value="{{ form.phone.value|default_if_none:'' }}" required autocomplete="tel" placeholder="+998 (__) ___-__-__">
+                <span class="field__error" data-i18n="form.phoneError">Raqamni toʻliq kiriting</span>
+              </div>
+              <div class="field full">
+                <label for="c-budget" data-i18n="contact.budget">Byudjet, $</label>
+                <input class="input" id="c-budget" name="budget" value="{{ form.budget.value|default_if_none:'' }}" type="number" inputmode="numeric" min="0" step="1000" placeholder="70000">
+              </div>
+              <div class="field full{% if form.message.errors %} has-error{% endif %}">
+                <label for="c-message"><span data-i18n="contact.message">Xabar</span> <span class="req">*</span></label>
+                <textarea class="textarea" id="c-message" name="message" data-prefill-title="{% if prefill_car %}{{ prefill_car.title }} {{ prefill_car.year }}{% endif %}" required placeholder="Qanday mashina qidiryapsiz? Marka, yil, rang..." data-i18n-placeholder="contact.messagePh">{{ form.message.value|default_if_none:'' }}</textarea>
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn--gold btn--lg" type="submit"><i data-icon="arrowR"></i><span data-i18n="form.submit">Arizani yuborish</span></button>
+        </form>
+
+        <aside>
+          <div class="side-card">
+            <h3 data-i18n="contact.hoursTitle">Ish vaqti</h3>
+            <ul class="benefits">
+              <li><i data-icon="clock"></i><span><span data-l="uz">{{ SITE.work_hours_uz }}</span><span data-l="ru" hidden>{{ SITE.work_hours_ru }}</span></span></li>
+              <li><i data-icon="pin"></i><span><span data-l="uz">{{ SITE.city_uz }}</span><span data-l="ru" hidden>{{ SITE.city_ru }}</span></span></li>
+              <li><i data-icon="info"></i><span data-i18n="contact.visit">Mashinani koʻrish uchun oldindan qoʻngʻiroq qilib, vaqtni kelishib oling.</span></li>
+            </ul>
+          </div>
+          <div class="side-card">
+            <h3 data-i18n="contact.channelTitle">Yangi eʼlonlarni oʻtkazib yubormang</h3>
+            <p style="color:var(--muted);margin-bottom:16px" data-i18n="contact.channelText">Telegram kanalga obuna boʻling — yangi mashinalar birinchi boʻlib shu yerda chiqadi.</p>
+            <a class="btn btn--tg btn--block" id="channel-btn" href="https://t.me/{{ SITE.telegram_channel }}" target="_blank" rel="noopener"><i data-icon="telegram"></i><span data-i18n="contact.subscribe">Obuna boʻlish</span></a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="map">
+          <iframe id="map" title="Xarita" data-src="https://maps.google.com/maps?q={{ SITE.map_query|urlencode }}&amp;z=12&amp;output=embed&amp;hl=" data-i18n-aria="contact.map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </section>
+  
+{% for m in messages %}<div id="lead-sent" hidden></div>{% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/pages/forms.js' %}"></script>{% endblock %}

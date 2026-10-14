@@ -1,0 +1,21 @@
+{% load car_tags %}
+<thead><tr>
+  <th scope="row" data-i18n="compare.car">Avtomobil</th>
+  {% for car in compare %}
+  <th class="compare__car" scope="col"><a href="{{ car.get_absolute_url }}"><img src="{{ car.cover.thumb_url }}" alt="" loading="lazy">{{ car.title }}</a></th>
+  {% endfor %}
+</tr></thead>
+<tbody>
+  <tr><th scope="row" data-i18n="spec.price">Narxi</th>{% for c in compare %}<td{% if c.price == best.price %} class="best"{% endif %}>{{ c.price|usd }}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.year">Yili</th>{% for c in compare %}<td{% if c.year == best.year %} class="best"{% endif %}>{{ c.year }}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.mileage">Probeg</th>{% for c in compare %}<td{% if c.mileage == best.mileage %} class="best"{% endif %}>{{ c.mileage|spaced }} km</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.power">Quvvati</th>{% for c in compare %}<td{% if c.power and c.power == best.power %} class="best"{% endif %}>{% if c.power %}{{ c.power }} <span data-i18n="unit.hp">o.k.</span>{% else %}—{% endif %}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.engine">Dvigatel</th>{% for c in compare %}<td>{{ c.engine|default:"—" }}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.fuel">Yoqilgʻi</th>{% for c in compare %}<td>{% choice c "fuel" %}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.drive">Privod</th>{% for c in compare %}<td>{% choice c "drive" %}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.body">Kuzov</th>{% for c in compare %}<td>{% choice c "body" %}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.color">Rangi</th>{% for c in compare %}<td>{% choice c "color" %}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.seats">Oʻrinlar</th>{% for c in compare %}<td>{{ c.seats }}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.condition">Holati</th>{% for c in compare %}<td>{% condition_short c %}</td>{% endfor %}</tr>
+  <tr><th scope="row" data-i18n="spec.status">Status</th>{% for c in compare %}<td><span data-i18n="status.{{ c.status }}">{{ c.get_status_display }}</span></td>{% endfor %}</tr>
+</tbody>

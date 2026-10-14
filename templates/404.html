@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title_attrs %} data-i18n="meta.404Title"{% endblock %}
+{% block title %}Sahifa topilmadi — Inomarka Bor{% endblock %}
+{% block page %}404{% endblock %}
+{% block content %}
+    <section class="container notfound">
+      <div class="notfound__code text-gold">404</div>
+      <h1 data-i18n="nf.title">Bu sahifa topilmadi</h1>
+      <p data-i18n="nf.text">Ehtimol, bu mashina allaqachon “Baraka boʻldi” 🤝 yoki havola notoʻgʻri. Katalogdan boshqa variantlarni koʻring.</p>
+      <a class="btn btn--gold btn--lg" href="/catalog/" data-i18n="hero.cta">Katalogni koʻrish</a>
+      <a class="btn btn--lg" href="/" data-i18n="nav.home">Bosh sahifa</a>
+    </section>
+  {% endblock %}

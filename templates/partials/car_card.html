@@ -1,0 +1,30 @@
+{% load static car_tags %}{% with cover=car.cover %}
+<article class="card{% if car.is_sold %} is-sold{% endif %}{% if not noreveal %} reveal{% endif %}">
+  <div class="card__media">
+    <img src="{% if cover %}{{ cover.thumb_url }}{% else %}{% static 'img/brand/og-image.jpg' %}{% endif %}" alt="{{ car.title }}" loading="lazy" decoding="async" width="720" height="480">
+    <div class="card__badges">
+      <span class="badge badge--{{ car.status }}" data-i18n="status.{{ car.status }}">{{ car.get_status_display }}</span>
+      {% if car.featured and not car.is_sold %}<span class="badge badge--featured" data-i18n="badge.top">TOP</span>{% elif car.is_new %}<span class="badge badge--new" data-i18n="badge.new">Yangi</span>{% endif %}
+    </div>
+    {% if car.is_sold %}<div class="stamp"><span data-i18n="sold.stamp">Baraka boʻldi</span> 🤝</div>{% endif %}
+    <span class="card__photos"><i data-icon="camera"></i>{{ car.images.all|length }}</span>
+  </div>
+  <button class="fav-btn card__fav" type="button" data-fav="{{ car.slug }}" aria-pressed="false" aria-label="Saqlash" data-i18n-aria="fav.add"><i data-icon="heart"></i></button>
+  <div class="card__body">
+    <div>
+      <div class="card__brand">{{ car.brand.name }}</div>
+      <h3 class="card__title"><a href="{{ car.get_absolute_url }}">{{ car.short_title }}</a></h3>
+    </div>
+    <div class="card__chips">
+      <span class="chip"><i data-icon="calendar"></i>{{ car.year }}</span>
+      <span class="chip"><i data-icon="gauge"></i>{{ car.mileage|spaced }} km</span>
+      <span class="chip"><i data-icon="fuel"></i>{% choice car "fuel" %}</span>
+      {% if car.condition == "clean" %}<span class="chip"><i data-icon="shield"></i><span data-i18n="cond.cleanShort">Tozza</span></span>{% endif %}
+    </div>
+    <div class="card__foot">
+      <div class="price">{{ car.price|usd }}{% if car.is_sold %}<small><span data-i18n="sold.onLabel">Sotildi:</span> {% uzdate car.sold_at %}</small>{% elif car.negotiable %}<small data-i18n="price.negotiable">Kelishiladi</small>{% elif SITE.show_uzs %}<small>{% uzs car.price %}</small>{% endif %}</div>
+      <span class="card__go" aria-hidden="true"><i data-icon="arrowUR"></i></span>
+    </div>
+  </div>
+</article>
+{% endwith %}

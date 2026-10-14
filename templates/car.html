@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title %}{{ car.title }} {{ car.year }} — {{ car.price|usd }} | {{ SITE.brand }}{% endblock %}
+{% block meta %}
+  <meta name="description" content="{{ car.title }}, {{ car.year }}, {{ car.mileage|spaced }} km, {{ car.price|usd }}. {{ desc_first_line }}">
+  <meta property="og:title" content="{{ car.title }} {{ car.year }} — {{ car.price|usd }}">
+{% endblock %}
+{% block og %}{% if images %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ images.0.image.url }}">{% endif %}{% endblock %}
+{% block head_extra %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Car",
+    "name": "{{ car.title|escapejs }}",
+    "brand": { "@type": "Brand", "name": "{{ car.brand.name|escapejs }}" },
+    "model": "{{ car.model|escapejs }}",
+    "vehicleModelDate": "{{ car.year }}",
+    "mileageFromOdometer": { "@type": "QuantitativeValue", "value": {{ car.mileage }}, "unitCode": "KMT" },
+    "fuelType": "{{ car.get_fuel_display|escapejs }}",
+    "vehicleTransmission": "{{ car.get_transmission_display|escapejs }}",
+    "color": "{{ car.get_color_display|escapejs }}",
+    "image": [{% for img in images %}"{{ request.scheme }}://{{ request.get_host }}{{ img.image.url }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+    "offers": {
+      "@type": "Offer",
+      "price": {{ car.price }},
+      "priceCurrency": "USD",
+      "availability": "{% if sold %}https://schema.org/SoldOut{% else %}https://schema.org/InStock{% endif %}",
+      "seller": { "@type": "AutoDealer", "name": "{{ SITE.brand|escapejs }}" }
+    }
+  }
+  </script>
+{% endblock %}
+{% block page %}car{% endblock %}
+{% block content %}
+    <div class="container" style="padding-top:28px">
+      <nav class="breadcrumbs" id="crumbs" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><a href="{% url 'catalog' %}" data-i18n="nav.catalog">Avtomobillar</a><span aria-hidden="true">/</span><span aria-current="page">{{ car.title }}</span>
+      </nav>
+
+      <div id="car-root">
+        <div class="car-layout">
+          <div class="car-gallery">
+            <div class="gallery">
+              <div class="gallery__main" id="g-main" tabindex="0" aria-roledescription="carousel" aria-label="Rasmlar" data-i18n-aria="car.photos">
+                <img id="g-img" src="{% if images %}{{ images.0.image.url }}{% else %}{% static 'img/brand/og-image.jpg' %}{% endif %}" alt="{{ car.title }}" width="1600" height="1067">
+                {% if sold %}<div class="stamp"><span data-i18n="sold.stamp">Baraka boʻldi</span> 🤝</div>{% endif %}
+                {% if images|length > 1 %}
+                <button class="gallery__arrow gallery__arrow--prev" type="button" data-step="-1" aria-label="Oldingi" data-i18n-aria="common.prev"><i data-icon="chevL"></i></button>
+                <button class="gallery__arrow gallery__arrow--next" type="button" data-step="1" aria-label="Keyingi" data-i18n-aria="common.next"><i data-icon="chevR"></i></button>
+                {% endif %}
+                <span class="gallery__counter" id="g-counter">1 / {{ images|length|default:1 }}</span>
+                <span class="btn btn--sm gallery__zoom" aria-hidden="true"><i data-icon="zoom"></i><span data-i18n="car.zoom">Kattalashtirish</span></span>
+              </div>
+              {% if images|length > 1 %}
+              <div class="gallery__thumbs" role="tablist" aria-label="Rasmlar" data-i18n-aria="car.photos">
+                {% for img in images %}
+                <button class="gallery__thumb{% if forloop.first %} is-active{% endif %}" type="button" role="tab" data-i="{{ forloop.counter0 }}" aria-label="{{ forloop.counter }}-rasm" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"><img src="{{ img.thumb_url }}" alt="" loading="lazy"></button>
+                {% endfor %}
+              </div>
+              {% endif %}
+              <p class="photo-credit" id="g-credit"></p>
+              <ul id="g-data" hidden>
+                {% for img in images %}<li data-src="{{ img.image.url }}" data-author="{{ img.credit_author }}" data-license="{{ img.credit_license }}" data-source="{{ img.credit_source }}"></li>{% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <aside class="car-aside">
+            <div class="panel">
+              <div class="car-aside__top">
+                <span class="badge badge--{{ car.status }}" data-i18n="status.{{ car.status }}">{{ car.get_status_display }}</span>
+                <div style="display:flex;gap:8px">
+                  <button class="fav-btn" type="button" data-fav="{{ car.slug }}" aria-pressed="false" aria-label="Saqlash" data-i18n-aria="fav.add"><i data-icon="heart"></i></button>
+                  <button class="fav-btn" type="button" data-action="share" aria-label="Ulashish" data-i18n-aria="cta.share"><i data-icon="share"></i></button>
+                </div>
+              </div>
+              <h1>{{ car.title }}</h1>
+              <p class="car-sub">{{ car.year }} · {{ car.mileage|spaced }} km · <span data-l="uz">{{ SITE.city_uz }}</span><span data-l="ru" hidden>{{ SITE.city_ru }}</span></p>
+              <div class="car-price"><div class="price">
+                {% if sold %}<span data-i18n="sold.stamp">Baraka boʻldi</span> 🤝{% else %}{{ car.price|usd }}{% endif %}
+                <small>{% if sold %}{% uzdate car.sold_at %}{% else %}{% if SITE.show_uzs %}{% uzs car.price %} · {% endif %}{% if car.negotiable %}<span data-i18n="price.negotiable">Kelishiladi</span>{% else %}<span data-i18n="price.fixed">Narx qatʼiy</span>{% endif %}{% endif %}</small>
+              </div></div>
+              <dl class="car-quick">
+                <div><dt data-i18n="spec.year">Yili</dt><dd>{{ car.year }}</dd></div>
+                <div><dt data-i18n="spec.mileage">Probeg</dt><dd>{{ car.mileage|spaced }} km</dd></div>
+                <div><dt data-i18n="spec.engine">Dvigatel</dt><dd>{{ car.engine|default:"—" }}</dd></div>
+                <div><dt data-i18n="spec.condition">Holati</dt><dd>{% condition_short car %}</dd></div>
+              </dl>
+              <div class="car-actions">
+                {% if sold %}
+                <a class="btn btn--gold btn--lg btn--block" href="{% url 'contact' %}?type=find&amp;car={{ car.slug }}"><i data-icon="search"></i><span data-i18n="car.findSimilar">Oʻxshashini topib bering</span></a>
+                <button class="btn btn--tg btn--lg btn--block" type="button" data-action="tg"><i data-icon="telegram"></i><span data-i18n="cta.telegram">Telegram orqali yozish</span></button>
+                {% else %}
+                <a class="btn btn--gold btn--lg btn--block" href="tel:{{ SITE.phones.0.number }}"><i data-icon="phone"></i><span data-i18n="cta.call">Qoʻngʻiroq qilish</span> · {{ SITE.phones.0.display }}</a>
+                <button class="btn btn--tg btn--lg btn--block" type="button" data-action="tg"><i data-icon="telegram"></i><span data-i18n="car.askTelegram">Telegramʼda soʻrash</span></button>
+                {% endif %}
+                <div class="car-actions__row">
+                  <a class="btn" href="{{ car.video_url|default:'https://www.instagram.com/' }}{% if not car.video_url %}{{ SITE.instagram }}/{% endif %}" target="_blank" rel="noopener"><i data-icon="play"></i><span data-i18n="car.video">Video</span></a>
+                  <button class="btn" type="button" data-action="share"><i data-icon="share"></i><span data-i18n="cta.share">Ulashish</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="panel seller">
+              <span class="seller__avatar"><img src="{% static 'img/brand/icon-192.png' %}" alt=""></span>
+              <div><b>{{ SITE.owner }} · {{ SITE.brand }}<i data-icon="verified"></i></b><span data-i18n="car.seller" data-years="{{ SITE.experience_years }}">{{ SITE.experience_years }} yillik tajriba · Tasdiqlangan sotuvchi</span></div>
+            </div>
+          </aside>
+
+          <div class="car-details">
+            <section class="car-section"><h2 data-i18n="car.specs">Xususiyatlari</h2>
+              <dl class="specs">
+                <div class="spec"><span class="spec__icon"><i data-icon="calendar"></i></span><div><dt data-i18n="spec.year">Yili</dt><dd>{{ car.year }}{% if car.reg_year and car.reg_year != car.year %} · <span data-i18n="spec.reg" data-y="{{ car.reg_year }}">texpasport {{ car.reg_year }}</span>{% endif %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="gauge"></i></span><div><dt data-i18n="spec.mileage">Probeg</dt><dd>{{ car.mileage|spaced }} km</dd></div></div>
+                {% if car.engine %}<div class="spec"><span class="spec__icon"><i data-icon="engine"></i></span><div><dt data-i18n="spec.engine">Dvigatel</dt><dd>{{ car.engine }}</dd></div></div>{% endif %}
+                {% if car.power %}<div class="spec"><span class="spec__icon"><i data-icon="sparkle"></i></span><div><dt data-i18n="spec.power">Quvvati</dt><dd>{{ car.power }} <span data-i18n="unit.hp">o.k.</span></dd></div></div>{% endif %}
+                <div class="spec"><span class="spec__icon"><i data-icon="fuel"></i></span><div><dt data-i18n="spec.fuel">Yoqilgʻi</dt><dd>{% choice car "fuel" %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="gearbox"></i></span><div><dt data-i18n="spec.transmission">Uzatmalar qutisi</dt><dd>{% choice car "transmission" %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="route"></i></span><div><dt data-i18n="spec.drive">Privod</dt><dd>{% choice car "drive" %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="car"></i></span><div><dt data-i18n="spec.body">Kuzov</dt><dd>{% choice car "body" %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="palette"></i></span><div><dt data-i18n="spec.color">Rangi</dt><dd>{% choice car "color" %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="seat"></i></span><div><dt data-i18n="spec.seats">Oʻrinlar</dt><dd>{{ car.seats }}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="shield"></i></span><div><dt data-i18n="spec.condition">Holati</dt><dd>{% choice car "condition" %}</dd></div></div>
+                <div class="spec"><span class="spec__icon"><i data-icon="clock"></i></span><div><dt data-i18n="spec.posted">Eʼlon sanasi</dt><dd>{% uzdate car.posted_at %}</dd></div></div>
+              </dl>
+            </section>
+            {% if car.description_uz or car.description_ru %}
+            <section class="car-section"><h2 data-i18n="car.description">Tavsif</h2>
+              <p class="description" data-l="uz">{{ car.description_uz }}</p>
+              <p class="description" data-l="ru" hidden>{{ car.description_ru|default:car.description_uz }}</p>
+            </section>
+            {% endif %}
+            {% if features %}
+            <section class="car-section"><h2 data-i18n="car.features">Qulayliklar</h2>
+              <ul class="feature-list">
+                {% for f in features %}<li><i data-icon="checkCircle"></i><span data-l="uz">{{ f.name_uz }}</span><span data-l="ru" hidden>{{ f.name_ru|default:f.name_uz }}</span></li>{% endfor %}
+              </ul>
+            </section>
+            {% endif %}
+            <section class="car-section"><div class="notice"><i data-icon="info"></i>
+              <p data-i18n="{% if sold %}car.soldNotice{% else %}car.notice{% endif %}">{% if sold %}Bu mashina sotilgan. Shunga oʻxshash variant kerak boʻlsa — yozing, topib beramiz.{% else %}Mashinani koʻrish uchun oldindan qoʻngʻiroq qilib, vaqtni kelishib oling. Koʻrish vaqtida mashinani oʻzingiz tanlagan servisda tekshirtirishingiz mumkin.{% endif %}</p>
+            </div></section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if similar %}
+    <section class="section" id="similar-section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="car.similarEyebrow">Sizga yoqishi mumkin</span>
+            <h2 class="section-title" data-i18n="car.similar">Oʻxshash avtomobillar</h2>
+          </div>
+          <a class="link-arrow" href="{% url 'catalog' %}"><span data-i18n="home.allCars">Barcha avtomobillar</span><i data-icon="arrowR"></i></a>
+        </div>
+        <div class="cars-grid" id="similar">
+          {% for car in similar %}{% include "partials/car_card.html" %}{% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if not sold %}
+    <div class="mobile-bar">
+      <div class="price">{{ car.price|usd }}</div>
+      <a class="btn btn--gold" href="tel:{{ SITE.phones.0.number }}" aria-label="Qoʻngʻiroq qilish" data-i18n-aria="cta.call"><i data-icon="phone"></i><span data-i18n="cta.callShort">Qoʻngʻiroq</span></a>
+      <button class="btn btn--tg" type="button" data-action="tg" aria-label="Telegram"><i data-icon="telegram"></i><span>Telegram</span></button>
+    </div>
+    {% endif %}
+{% endblock %}
+{% block scripts %}
+<script id="car-data" type="application/json">{"title": "{{ car.title|escapejs }}", "year": {{ car.year }}, "price": {{ car.price }}, "sold": {% if sold %}true{% else %}false{% endif %}}</script>
+<script src="{% static 'js/pages/car.js' %}"></script>
+{% endblock %}

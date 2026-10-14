@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title_attrs %} data-i18n="meta.soldTitle"{% endblock %}
+{% block title %}Baraka boʻldi — sotilgan avtomobillar | Inomarka Bor{% endblock %}
+{% block page %}sold{% endblock %}
+{% block content %}
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="{% url 'home' %}" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.sold">Baraka boʻldi</span>
+        </nav>
+        <h1><span data-i18n="sold.title">Baraka boʻldi</span> <span aria-hidden="true">🤝</span></h1>
+        <p id="sold-lead" data-i18n="sold.lead" data-n="{{ total }}">{{ total }} ta mashina allaqachon yangi egasiga yetkazildi. Har bir sotuv — ochiq va halol.</p><p hidden data-i18n="sold.sub">Bu mashinalar allaqachon yangi egalariga yetkazildi. Har bir sotuv — ochiq va halol.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="toolbar">
+          <div class="filter-chips" id="sold-brands" role="group" aria-label="Marka" data-i18n-aria="filter.brand">
+            <a class="filter-chip{% if not active %} is-active{% endif %}" href="{% url 'sold' %}"{% if not active %} aria-current="true"{% endif %}><span data-i18n="sold.all">Barchasi</span> ({{ total }})</a>
+            {% for b in brands %}<a class="filter-chip{% if b.name == active %} is-active{% endif %}" href="{% url 'sold' %}?brand={{ b.name|urlencode }}">{{ b.name }} ({{ b.count }})</a>{% endfor %}
+          </div>
+        </div>
+        <div class="cars-grid" id="sold-grid">
+          {% for car in cars %}{% include "partials/car_card.html" %}{% empty %}
+          <div class="empty" style="grid-column:1/-1"><h3 data-i18n="sold.empty">Hozircha bu marka boʻyicha sotuvlar yoʻq</h3></div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-band reveal">
+          <div>
+            <span class="eyebrow" data-i18n="sold.ctaEyebrow">Siz ham shunday mashina istaysizmi?</span>
+            <h2 data-i18n="sold.ctaTitle">Kerakli mashinani topib beramiz</h2>
+            <p data-i18n="sold.ctaText">Marka, yil va byudjetingizni yozing — 16 yillik tajriba va keng aloqalarimiz orqali eng yaxshi variantni topamiz.</p>
+          </div>
+          <div class="cta-band__actions">
+            <a class="btn btn--gold btn--lg" href="{% url 'contact' %}?type=find"><span data-i18n="sold.ctaBtn">Buyurtma berish</span><i data-icon="arrowR"></i></a>
+            <a class="btn btn--lg" href="{% url 'catalog' %}" data-i18n="hero.cta">Katalogni koʻrish</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endblock %}

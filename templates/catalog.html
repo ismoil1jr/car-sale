@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title_attrs %} data-i18n="meta.catalogTitle"{% endblock %}
+{% block title %}Avtomobillar katalogi — Inomarka Bor{% endblock %}
+{% block meta %}
+  <meta name="description" data-i18n-content="meta.catalogDesc" content="Sotuvdagi barcha premium avtomobillar: marka, narx, yil va probeg boʻyicha qulay filtr.">
+  <meta property="og:title" content="Avtomobillar katalogi — Inomarka Bor">
+{% endblock %}
+{% block page %}catalog{% endblock %}
+{% block content %}
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="{% url 'home' %}" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.catalog">Avtomobillar</span>
+        </nav>
+        <h1 data-i18n="catalog.title">Avtomobillar katalogi</h1>
+        <p data-i18n="catalog.sub">Barcha mashinalar bir joyda: narx, yil, probeg va kraska holati ochiq yozilgan. Yoqqanini saqlab qoʻying va solishtiring.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="catalog">
+          <aside class="filters" aria-label="Filtrlar" data-i18n-aria="filter.title">
+            {% include "partials/filters.html" with uid="desktop" mobile=False %}
+          </aside>
+
+          <div>
+            <div class="toolbar">
+              <button class="btn btn--sm filters-btn" type="button" id="open-filters" aria-controls="filter-sheet" aria-expanded="false">
+                <i data-icon="sliders"></i><span data-i18n="filter.title">Filtrlar</span>
+              </button>
+              <div class="toolbar__count" id="count" aria-live="polite" data-i18n="catalog.found" data-n="{{ count }}">{{ count }} ta avtomobil topildi</div>
+              <div class="toolbar__right">
+                <label class="sr-only" for="sort" data-i18n="sort.label">Saralash</label>
+                <select class="select" id="sort">
+                  {% for value, label in sorts %}<option value="{{ value }}"{% if f.sort == value %} selected{% endif %} data-i18n="sort.{{ value }}">{{ label }}</option>{% endfor %}
+                </select>
+                <div class="view-toggle" role="group" aria-label="Koʻrinish" data-i18n-aria="view.label">
+                  <button type="button" data-view="grid" aria-label="Toʻr" data-i18n-aria="view.grid"><i data-icon="grid"></i></button>
+                  <button type="button" data-view="list" aria-label="Roʻyxat" data-i18n-aria="view.list"><i data-icon="list"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="active-filters" id="active-filters">
+              {% if chips %}
+                {% for c in chips %}
+                <a class="active-filter" href="{{ c.url }}" aria-label="Olib tashlash: {{ c.label }}">
+                  <span{% if c.i18n %} data-i18n="{{ c.i18n }}"{% for k, v in c.vars.items %} data-{{ k }}="{{ v }}"{% endfor %}{% endif %}>{{ c.label }}</span><i data-icon="x"></i>
+                </a>
+                {% endfor %}
+                <a class="clear-all" href="{% url 'catalog' %}" data-i18n="filter.resetAll">Hammasini tozalash</a>
+              {% endif %}
+            </div>
+
+            <div class="cars-grid" id="results">
+              {% for car in cars %}{% include "partials/car_card.html" with noreveal=True %}{% empty %}
+              <div class="empty" style="grid-column:1/-1">
+                <div class="empty__icon"><i data-icon="search"></i></div>
+                <h3 data-i18n="catalog.emptyTitle">Hech narsa topilmadi</h3>
+                <p data-i18n="catalog.emptyText">Filtrlarni oʻzgartirib koʻring yoki bizga yozing — kerakli mashinani topib beramiz.</p>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                  <a class="btn" href="{% url 'catalog' %}" data-i18n="filter.reset">Tozalash</a>
+                  <a class="btn btn--gold" href="{% url 'contact' %}?type=find" data-i18n="catalog.findForMe">Topib bering</a>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="sheet" id="filter-sheet" aria-hidden="true">
+      <div class="sheet__backdrop" data-sheet-close></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet__head">
+          <h3 id="sheet-title" data-i18n="filter.title">Filtrlar</h3>
+          <button class="icon-btn" type="button" data-sheet-close aria-label="Yopish" data-i18n-aria="common.close"><i data-icon="x"></i></button>
+        </div>
+        {% include "partials/filters.html" with uid="mobile" mobile=True %}
+        <div class="sheet__foot">
+          <a class="btn" href="{% url 'catalog' %}" data-i18n="filter.reset">Tozalash</a>
+          <button class="btn btn--gold" type="submit" form="filters-mobile" data-i18n="filter.showN" data-n="{{ count }}">{{ count }} ta natijani koʻrsatish</button>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/pages/catalog.js' %}"></script>{% endblock %}

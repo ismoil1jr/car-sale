@@ -1,0 +1,43 @@
+{% load static car_tags %}
+<header class="header" id="header">
+  <div class="container header__inner">
+    <a class="header__logo" href="{% url 'home' %}" aria-label="{{ SITE.brand }}">
+      <img src="{% static 'img/brand/logo-sm.png' %}" alt="{{ SITE.brand }}" width="355" height="110">
+    </a>
+    <nav class="nav" aria-label="Asosiy menyu" data-i18n-aria="nav.label">
+      <ul class="nav__list">
+        {% for page, href, key, label in NAV %}
+        <li><a class="nav__link{% if current_page == page %} is-active{% endif %}" href="{{ href }}"{% if current_page == page %} aria-current="page"{% endif %} data-i18n="{{ key }}">{{ label }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+    <div class="header__actions">
+      <div class="lang-switch" role="group" aria-label="Til" data-i18n-aria="lang.label">
+        <button type="button" data-lang="uz" class="is-active" aria-pressed="true">UZ</button>
+        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      </div>
+      <a class="icon-btn" href="{% url 'favorites' %}" aria-label="Saqlanganlar" data-i18n-aria="nav.favorites"><i data-icon="heart"></i><span class="count" data-fav-count hidden>0</span></a>
+      <a class="btn btn--gold btn--sm header__call" href="tel:{{ SITE.phones.0.number }}" aria-label="Qoʻngʻiroq qilish {{ SITE.phones.0.display }}"><i data-icon="phone"></i><span>{{ SITE.phones.0.display }}</span></a>
+      <button class="icon-btn burger" type="button" aria-label="Menyu" data-i18n-aria="nav.menu" aria-expanded="false" aria-controls="drawer"><i data-icon="menu"></i></button>
+    </div>
+  </div>
+</header>
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__backdrop" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Menyu" data-i18n-aria="nav.menu">
+    <div class="drawer__head">
+      <img src="{% static 'img/brand/logo-sm.png' %}" alt="{{ SITE.brand }}" width="355" height="110">
+      <button class="icon-btn" type="button" data-drawer-close aria-label="Yopish" data-i18n-aria="common.close"><i data-icon="x"></i></button>
+    </div>
+    <nav class="drawer__nav">
+      {% for page, href, key, label in NAV %}
+      <a href="{{ href }}"{% if current_page == page %} class="is-active" aria-current="page"{% endif %}><span data-i18n="{{ key }}">{{ label }}</span><i data-icon="chevR"></i></a>
+      {% endfor %}
+      <a href="{% url 'favorites' %}"><span data-i18n="nav.favorites">Saqlanganlar</span><i data-icon="chevR"></i></a>
+    </nav>
+    <div class="drawer__foot">
+      <a class="btn btn--gold btn--block" href="tel:{{ SITE.phones.0.number }}"><i data-icon="phone"></i>{{ SITE.phones.0.display }}</a>
+      <a class="btn btn--tg btn--block" href="https://t.me/{{ SITE.telegram_personal }}" target="_blank" rel="noopener"><i data-icon="telegram"></i><span data-i18n="cta.telegram">Telegram orqali yozish</span></a>
+    </div>
+  </div>
+</div>

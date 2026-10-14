@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title_attrs %} data-i18n="meta.favTitle"{% endblock %}
+{% block title %}Saqlanganlar — Inomarka Bor{% endblock %}
+{% block page %}favorites{% endblock %}
+{% block content %}
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="{% url 'home' %}" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.favorites">Saqlanganlar</span>
+        </nav>
+        <h1 data-i18n="fav.title">Saqlangan avtomobillar</h1>
+        <p data-i18n="fav.sub">Yoqqan mashinalarni ♥ tugmasi bilan saqlang va bir-biri bilan solishtiring.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cars-grid" id="fav-grid" data-url="{% url 'favorites_cards' %}" data-catalog="{% url 'catalog' %}"></div>
+      </div>
+    </section>
+
+    <section class="section" id="compare-section" hidden style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-head__text">
+            <span class="eyebrow" data-i18n="compare.eyebrow">Taqqoslash</span>
+            <h2 class="section-title" data-i18n="compare.title">Yonma-yon solishtiring</h2>
+            <p class="section-sub" data-i18n="compare.sub">★ — eng yaxshi qiymat (arzon narx, kam probeg, yangi yil, kuchli dvigatel).</p>
+          </div>
+        </div>
+        <div class="compare-wrap"><table class="compare" id="compare"></table></div>
+      </div>
+    </section>
+  {% endblock %}
+{% block scripts %}<script src="{% static 'js/pages/favorites.js' %}"></script>{% endblock %}

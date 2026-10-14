@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static car_tags %}
+{% block title_attrs %} data-i18n="meta.sellTitle"{% endblock %}
+{% block title %}Mashinangizni soting — Inomarka Bor{% endblock %}
+{% block page %}sell{% endblock %}
+{% block content %}
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/" data-i18n="nav.home">Bosh sahifa</a><span aria-hidden="true">/</span><span data-i18n="nav.sell">Mashinangizni soting</span>
+        </nav>
+        <h1 data-i18n="sell.title">Mashinangizni soting</h1>
+        <p data-i18n="sell.sub">Arizani 2 daqiqada toʻldiring — biz bogʻlanamiz, narxni birga belgilaymiz va mashinangizni 22 000+ obunachiga koʻrsatamiz.</p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container form-layout">
+        <form class="form" method="post" enctype="multipart/form-data" action="{% url 'sell' %}" data-lead-form novalidate>
+          {% csrf_token %}
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num">1</span><span data-i18n="sell.step1">Avtomobil haqida</span></h2>
+            <div class="form-grid">
+              <div class="field{% if form.brand.errors %} has-error{% endif %}">
+                <label for="s-brand"><span data-i18n="form.brand">Marka</span> <span class="req">*</span></label>
+                <input class="input" id="s-brand" name="brand" value="{{ form.brand.value|default_if_none:'' }}" list="brand-list" required autocomplete="off" placeholder="Masalan, Chevrolet" data-i18n-placeholder="form.brandPh">
+                <datalist id="brand-list">{% for b in brand_names %}<option value="{{ b }}">{% endfor %}</datalist>
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field{% if form.model.errors %} has-error{% endif %}">
+                <label for="s-model"><span data-i18n="form.model">Model</span> <span class="req">*</span></label>
+                <input class="input" id="s-model" name="model" value="{{ form.model.value|default_if_none:'' }}" required placeholder="Masalan, Tahoe" data-i18n-placeholder="form.modelPh">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field{% if form.year.errors %} has-error{% endif %}">
+                <label for="s-year"><span data-i18n="form.year">Ishlab chiqarilgan yili</span> <span class="req">*</span></label>
+                <select class="select" id="s-year" name="year" required><option value="" data-i18n="form.choose">Tanlang</option>{% for y in years %}<option value="{{ y }}"{% if form.year.value|stringformat:"s" == y|stringformat:"s" %} selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field{% if form.mileage.errors %} has-error{% endif %}">
+                <label for="s-km"><span data-i18n="form.mileage">Probeg, km</span> <span class="req">*</span></label>
+                <input class="input" id="s-km" name="mileage" value="{{ form.mileage.value|default_if_none:'' }}" type="number" inputmode="numeric" min="0" step="1000" required placeholder="45000">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field">
+                <label for="s-price" data-i18n="form.priceWish">Kutilayotgan narx, $</label>
+                <input class="input" id="s-price" name="budget" value="{{ form.budget.value|default_if_none:'' }}" type="number" inputmode="numeric" min="0" step="500" placeholder="50000">
+              </div>
+              <div class="field">
+                <label for="s-color" data-i18n="form.color">Rangi</label>
+                <select class="select" id="s-color" name="color"><option value="" data-i18n="form.choose">Tanlang</option>{% for value, label in colors %}<option value="{{ value }}"{% if form.color.value == value %} selected{% endif %} data-i18n="color.{{ value }}">{{ label }}</option>{% endfor %}</select>
+              </div>
+              <fieldset class="field full" style="border:0;padding:0;margin:0">
+                <legend class="label" style="margin-bottom:8px" data-i18n="form.condition">Kraska holati</legend>
+                <div class="radio-cards">
+                  <label class="radio-card"><input type="radio" name="paint" value="clean"{% if selected_paint == "clean" %} checked{% endif %}><span><i data-icon="shield"></i><span data-i18n="cond.cleanShort">Tozza</span></span></label>
+                  <label class="radio-card"><input type="radio" name="paint" value="partial"{% if selected_paint == "partial" %} checked{% endif %}><span><i data-icon="palette"></i><span data-i18n="cond.partialShort">Qisman kraska</span></span></label>
+                  <label class="radio-card"><input type="radio" name="paint" value="repair"{% if selected_paint == "repair" %} checked{% endif %}><span><i data-icon="wrench"></i><span data-i18n="cond.repairShort">Taʼmir talab</span></span></label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num">2</span><span data-i18n="sell.step2">Rasmlar</span></h2>
+            <label class="upload" id="upload">
+              <input type="file" name="photos" accept="image/*" multiple data-ignore aria-label="Rasmlarni tanlang" data-i18n-aria="form.uploadAria">
+              <i data-icon="upload"></i>
+              <b data-i18n="form.uploadTitle">Rasmlarni shu yerga tashlang yoki tanlang</b>
+              <small data-i18n="form.uploadHint">Old, orqa, yon, salon va probeg — 5–10 ta rasm yetarli</small>
+            </label>
+            <div class="previews" id="previews"></div>
+          </div>
+
+          <div class="form-card">
+            <h2 class="form-card__title"><span class="num">3</span><span data-i18n="sell.step3">Aloqa maʼlumotlari</span></h2>
+            <div class="form-grid">
+              <div class="field{% if form.name.errors %} has-error{% endif %}">
+                <label for="s-name"><span data-i18n="form.name">Ismingiz</span> <span class="req">*</span></label>
+                <input class="input" id="s-name" name="name" value="{{ form.name.value|default_if_none:'' }}" required autocomplete="name" placeholder="Ism" data-i18n-placeholder="form.namePh">
+                <span class="field__error" data-i18n="form.required">Maydonni toʻldiring</span>
+              </div>
+              <div class="field{% if form.phone.errors %} has-error{% endif %}">
+                <label for="s-phone"><span data-i18n="form.phone">Telefon raqam</span> <span class="req">*</span></label>
+                <input class="input" id="s-phone" name="phone" type="tel" value="{{ form.phone.value|default_if_none:'' }}" required autocomplete="tel" placeholder="+998 (__) ___-__-__">
+                <span class="field__error" data-i18n="form.phoneError">Raqamni toʻliq kiriting</span>
+              </div>
+              <div class="field full">
+                <label for="s-comment" data-i18n="form.comment">Qoʻshimcha maʼlumot</label>
+                <textarea class="textarea" id="s-comment" name="message" placeholder="Komplektatsiya, servis tarixi, egalar soni..." data-i18n-placeholder="form.commentPh">{{ form.message.value|default_if_none:'' }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn--gold btn--lg" type="submit"><i data-icon="arrowR"></i><span data-i18n="form.submit">Arizani yuborish</span></button>
+          <p class="field__hint" data-i18n="form.privacy">Maʼlumotlaringiz faqat siz bilan bogʻlanish uchun ishlatiladi.</p>
+        </form>
+
+        <aside>
+          <div class="side-card">
+            <h3 data-i18n="sell.whyTitle">Nega bizga ishonishadi?</h3>
+            <ul class="benefits">
+              <li><i data-icon="users"></i><span data-i18n="sell.why1">22 000+ faol auditoriya — xaridor tez topiladi</span></li>
+              <li><i data-icon="play"></i><span data-i18n="sell.why2">Professional videosharh va chiroyli eʼlon</span></li>
+              <li><i data-icon="tag"></i><span data-i18n="sell.why3">Bozor narxini toʻgʻri baholaymiz</span></li>
+              <li><i data-icon="file"></i><span data-i18n="sell.why4">Oldi-sotdi hujjatlarida yordam</span></li>
+              <li><i data-icon="award"></i><span data-i18n="sell.why5">16 yillik tajriba va obroʻ</span></li>
+            </ul>
+          </div>
+          <div class="side-card">
+            <h3 data-i18n="sell.fastTitle">Tezroq gaplashamizmi?</h3>
+            <div class="contact-lines" id="side-contacts">
+              {% for p in SITE.phones %}<a class="contact-line" href="tel:{{ p.number }}"><span class="contact-line__icon"><i data-icon="phone"></i></span><span><small><span data-l="uz">{{ p.label_uz }}</span><span data-l="ru" hidden>{{ p.label_ru }}</span></small><b>{{ p.display }}</b></span></a>{% endfor %}
+              <a class="contact-line" href="https://t.me/{{ SITE.telegram_personal }}" target="_blank" rel="noopener"><span class="contact-line__icon"><i data-icon="telegram"></i></span><span><small>Telegram</small><b>@{{ SITE.telegram_personal }}</b></span></a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  
+{% for m in messages %}<div id="lead-sent" hidden></div>{% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/pages/forms.js' %}"></script>{% endblock %}

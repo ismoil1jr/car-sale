@@ -1,0 +1,63 @@
+{% load car_tags %}
+<form class="filters__box" id="filters-{{ uid }}" method="get" action="{% url 'catalog' %}" data-filter-form>
+  {% if f.sort != "new" %}<input type="hidden" name="sort" value="{{ f.sort }}">{% endif %}
+  <div class="filter-group">
+    <div class="search-input"><i data-icon="search"></i>
+      <input class="input" type="search" name="q" value="{{ f.q }}" placeholder="Model, marka yoki yil..." data-i18n-placeholder="filter.searchPh" aria-label="Qidirish" data-i18n-aria="filter.search">
+    </div>
+  </div>
+  <div class="filter-group"><h4 data-i18n="filter.brand">Marka</h4>
+    <div class="check-list">
+      {% for b in brands %}
+      <label class="check"><input type="checkbox" name="brand" value="{{ b.name }}"{% if b.name in f.brand %} checked{% endif %}><span class="check__box"><i data-icon="check"></i></span><span>{{ b.name }}</span><span class="check__count">{{ b.count }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="filter-group"><h4 data-i18n="filter.body">Kuzov turi</h4>
+    <div class="filter-chips">
+      {% for value, label in body_options %}
+      <label class="filter-chip{% if value in f.body %} is-active{% endif %}"><input type="checkbox" name="body" value="{{ value }}" hidden{% if value in f.body %} checked{% endif %}><span data-i18n="body.{{ value }}">{{ label }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="filter-group"><h4 data-i18n="filter.fuel">Yoqilgʻi</h4>
+    <div class="filter-chips">
+      {% for value, label in fuel_options %}
+      <label class="filter-chip{% if value in f.fuel %} is-active{% endif %}"><input type="checkbox" name="fuel" value="{{ value }}" hidden{% if value in f.fuel %} checked{% endif %}><span data-i18n="fuel.{{ value }}">{{ label }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="filter-group"><h4 data-i18n="filter.price">Narx, $</h4>
+    <div class="range-pair">
+      <input class="input" type="number" inputmode="numeric" min="0" step="1000" name="priceMin" value="{{ f.priceMin|default_if_none:'' }}" placeholder="dan" data-i18n-placeholder="filter.from" aria-label="Narx (dan)" data-i18n-aria="filter.priceMin">
+      <input class="input" type="number" inputmode="numeric" min="0" step="1000" name="priceMax" value="{{ f.priceMax|default_if_none:'' }}" placeholder="gacha" data-i18n-placeholder="filter.to" aria-label="Narx (gacha)" data-i18n-aria="filter.priceMax">
+    </div>
+  </div>
+  <div class="filter-group"><h4 data-i18n="filter.year">Ishlab chiqarilgan yili</h4>
+    <div class="range-pair">
+      <select class="select" name="yearMin" aria-label="Yil (dan)" data-i18n-aria="filter.yearMin">
+        <option value="" data-i18n="filter.from">dan</option>
+        {% for y in years %}<option value="{{ y }}"{% if f.yearMin == y %} selected{% endif %}>{{ y }}</option>{% endfor %}
+      </select>
+      <select class="select" name="yearMax" aria-label="Yil (gacha)" data-i18n-aria="filter.yearMax">
+        <option value="" data-i18n="filter.to">gacha</option>
+        {% for y in years %}<option value="{{ y }}"{% if f.yearMax == y %} selected{% endif %}>{{ y }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="filter-group"><h4 data-i18n="filter.mileage">Probeg</h4>
+    <select class="select" name="kmMax" aria-label="Probeg" data-i18n-aria="filter.mileage">
+      <option value="" data-i18n="filter.any">Istalgan</option>
+      {% for k in km_options %}<option value="{{ k }}"{% if f.kmMax == k %} selected{% endif %} data-i18n="filter.kmUpTo" data-km="{{ k|spaced }} km">{{ k|spaced }} km gacha</option>{% endfor %}
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="check-list">
+      <label class="check"><input type="checkbox" name="clean" value="1"{% if f.clean %} checked{% endif %}><span class="check__box"><i data-icon="check"></i></span><span data-i18n="filter.clean">Faqat tozza (kraskasiz)</span></label>
+      <label class="check"><input type="checkbox" name="sold" value="1"{% if f.sold %} checked{% endif %}><span class="check__box"><i data-icon="check"></i></span><span data-i18n="filter.showSold">Sotilganlarni ham koʻrsatish</span></label>
+    </div>
+  </div>
+  {% if not mobile %}
+  <a class="btn btn--sm btn--block" href="{% url 'catalog' %}"><i data-icon="refresh"></i><span data-i18n="filter.reset">Tozalash</span></a>
+  {% endif %}
+</form>
