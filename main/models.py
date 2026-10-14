@@ -302,9 +302,12 @@ class Ad(models.Model):
 
     title = models.CharField("Nomi", max_length=120)
     advertiser = models.CharField("Reklama beruvchi", max_length=120, blank=True)
-    video = models.FileField("Video (mp4/webm)", upload_to="ads/%Y/%m/",
+    video = models.FileField("Video (mp4/webm)", upload_to="ads/%Y/%m/", blank=True,
                              validators=[FileExtensionValidator(["mp4", "webm", "mov", "m4v"])],
-                             help_text="Tavsiya: mp4 (H.264), 15–30 soniya, 20 MB gacha")
+                             help_text="Tavsiya: mp4 (H.264), 15–30 soniya, 10 MB gacha")
+    image = models.ImageField("Rasm (png/jpg/webp/gif)", upload_to="ads/%Y/%m/", blank=True,
+                              validators=[FileExtensionValidator(["png", "jpg", "jpeg", "webp", "gif"])],
+                              help_text="Video oʻrniga rasm ham boʻladi. Tavsiya: 1280×720 yoki 1080×1920, 1 MB gacha")
     link = models.URLField("Havola", max_length=500, help_text="Reklama bosilganda ochiladigan sahifa")
     price = models.PositiveIntegerField("Reklama narxi, soʻm", default=0)
     is_active = models.BooleanField("Faol", default=True)
@@ -325,6 +328,28 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.title
+
+    MAX_VIDEO_MB = 25
+    MAX_IMAGE_MB = 5
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.video and not self.image:
+            raise ValidationError("Video yoki rasm yuklang.")
+        if self.video and self.image:
+            raise ValidationError("Bitta reklamaga yo video, yo rasm yuklang — ikkalasini emas.")
+        if self.video and getattr(self.video, "size", 0) > self.MAX_VIDEO_MB * 1024 * 1024:
+            raise ValidationError({"video": f"Video {self.MAX_VIDEO_MB} MB dan oshmasin (telefonlarda sekin ochiladi)."})
+        if self.image and getattr(self.image, "size", 0) > self.MAX_IMAGE_MB * 1024 * 1024:
+            raise ValidationError({"image": f"Rasm {self.MAX_IMAGE_MB} MB dan oshmasin."})
+
+    @property
+    def kind(self):
+        return "video" if self.video else "image"
+
+    @property
+    def media_url(self):
+        return (self.video or self.image).url if (self.video or self.image) else ""
 
     @property
     def ctr(self):

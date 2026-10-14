@@ -247,3 +247,26 @@ class MediaRangeTests(TestCase):
             self.assertEqual(self.client.get("/media/../config/settings.py").status_code, 404)
         finally:
             os.remove(path)
+
+
+class ImageAdTests(TestCase):
+    def test_image_ad_and_validation(self):
+        import io
+        from django.core.exceptions import ValidationError
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+        from .models import Ad
+        buf = io.BytesIO()
+        Image.new("RGB", (8, 8), "red").save(buf, "PNG")
+        png = SimpleUploadedFile("ad.png", buf.getvalue(), content_type="image/png")
+        ad = Ad(title="Rasmli", link="https://example.uz", image=png)
+        ad.full_clean()
+        ad.save()
+        try:
+            self.assertEqual(ad.kind, "image")
+            html = self.client.get(reverse("home")).content.decode()
+            self.assertIn('"kind": "image"', html)
+            with self.assertRaises(ValidationError):
+                Ad(title="Bo'sh", link="https://example.uz").full_clean()
+        finally:
+            ad.image.delete(save=False)

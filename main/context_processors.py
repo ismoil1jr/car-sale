@@ -8,8 +8,8 @@ def site(request):
     match = getattr(request, "resolver_match", None)
     return {
         "SITE": settings.SITE,
-        "ADS": [{"id": a.id, "title": a.title, "video": a.video.url, "link": a.link}
-                for a in Ad.objects.running() if a.video],
+        "ADS": [{"id": a.id, "title": a.title, "kind": a.kind, "src": a.media_url, "link": a.link}
+                for a in Ad.objects.running() if a.video or a.image],
         "FOOTER_CATEGORIES": category_links(Car.objects.exclude(status=Car.Status.SOLD)),
         "current_page": match.url_name if match else "",
         "NAV": [

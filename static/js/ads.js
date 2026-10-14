@@ -2,7 +2,8 @@
  * Video reklama: foydalanuvchi mashinani bosganda, sahifaga o'tishdan oldin ko'rsatiladi.
  *  - Har bir reklama bir tashrifda bir marta chiqadi (2 ta reklama bo'lsa: 1-bosishda biri, 2-sida ikkinchisi,
  *    keyin boshqa chiqmaydi). Sahifa yangilansa (refresh) yoki saytga tashqaridan qayta kirilsa — qaytadan.
- *  - Ovoz boshida o'chiq (brauzerlar ovozli autoplay'ga ruxsat bermaydi), tugma bilan yoqiladi.
+ *  - Reklama video yoki rasm bo'ladi. Video ovozi boshida o'chiq (brauzerlar ovozli autoplay'ga
+ *    ruxsat bermaydi), tugma bilan yoqiladi. Rasm 6 soniya turadi.
  *  - 3 soniyadan keyin "O'tkazib yuborish" — tanlangan mashina sahifasi ochiladi.
  *  - Videoning o'ziga yoki "Batafsil" ga bosilsa — reklama havolasi yangi oynada ochiladi,
  *    joriy oynada esa tanlangan mashina ochiladi.
@@ -66,22 +67,38 @@
     show(ad, url.href);
   });
 
-  // --- Reklama oynasi ---
+  // "Orqaga" bosilganda brauzer sahifani xotiradan (bfcache) tiklaydi — ochiq qolgan oynani yopamiz
+  window.addEventListener("pageshow", function () { closeAll(); });
+  function closeAll() {
+    IB.qsa(".ad").forEach(function (el) {
+      var v = el.querySelector("video");
+      if (v) { v.pause(); v.removeAttribute("src"); v.load(); }
+      el.remove();
+    });
+    document.body.classList.remove("is-locked");
+  }
+
+  // --- Reklama oynasi (video yoki rasm) ---
+  var IMAGE_SECONDS = 6;
   function show(ad, carUrl) {
     markSeen(ad);
     var done = false;
+    var isVideo = ad.kind === "video";
     var root = document.createElement("div");
-    root.className = "ad";
+    root.className = "ad ad--" + ad.kind;
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
     root.setAttribute("aria-label", t("ad.label") + ": " + ad.title);
     root.innerHTML =
       '<div class="ad__stage">' +
-      '<video class="ad__video" playsinline muted autoplay preload="auto"></video>' +
+      (isVideo
+        ? '<video class="ad__media" playsinline webkit-playsinline muted autoplay preload="auto"></video>'
+        : '<img class="ad__media" alt="" decoding="async">') +
+      '<div class="ad__loader" aria-hidden="true"></div>' +
       '<a class="ad__hit" target="_blank" rel="noopener sponsored" aria-label="' + IB.esc(t("ad.open") + ": " + ad.title) + '"></a>' +
       '<div class="ad__top">' +
       '<span class="ad__label">' + IB.esc(t("ad.label")) + "</span>" +
-      '<button class="ad__sound" type="button" aria-pressed="false" aria-label="' + IB.esc(t("ad.soundOn")) + '">' + IB.icon("volumeX") + "</button>" +
+      (isVideo ? '<button class="ad__sound" type="button" aria-pressed="false" aria-label="' + IB.esc(t("ad.soundOn")) + '">' + IB.icon("volumeX") + "</button>" : "") +
       "</div>" +
       '<div class="ad__bottom">' +
       '<a class="ad__cta" target="_blank" rel="noopener sponsored"><span>' + IB.esc(ad.title) + "</span><b>" + IB.esc(t("ad.more")) + IB.icon("external") + "</b></a>" +
@@ -89,7 +106,7 @@
       "</div>" +
       '<div class="ad__progress" aria-hidden="true"><span></span></div>' +
       "</div>";
-    var video = root.querySelector(".ad__video");
+    var media = root.querySelector(".ad__media");
     var hit = root.querySelector(".ad__hit");
     var cta = root.querySelector(".ad__cta");
     var sound = root.querySelector(".ad__sound");
@@ -97,17 +114,38 @@
     var skipText = root.querySelector(".ad__skip-text");
     var bar = root.querySelector(".ad__progress span");
     hit.href = cta.href = ad.link;
-    // Ovoz boshida o'chiq (atributning o'zi ba'zi brauzerlarda yetmaydi — xususiyatni ham qo'yamiz)
-    video.muted = true;
-    video.defaultMuted = true;
-    video.src = ad.video;
+
+    function ready() { root.classList.add("is-ready"); }
+    if (isVideo) {
+      // Ovoz boshida o'chiq (atributning o'zi ba'zi brauzerlarda yetmaydi — xususiyatni ham qo'yamiz)
+      media.muted = true;
+      media.defaultMuted = true;
+      media.addEventListener("playing", ready);
+      media.addEventListener("error", function () { ready(); left = 0; renderSkip(); });
+      media.addEventListener("timeupdate", function () {
+        if (media.duration) bar.style.width = (media.currentTime / media.duration) * 100 + "%";
+      });
+      media.addEventListener("ended", function () { finish(); });
+      media.src = ad.src;
+    } else {
+      media.addEventListener("load", function () {
+        ready();
+        // Rasm IMAGE_SECONDS davomida turadi, keyin tanlangan mashina ochiladi
+        bar.style.transition = "width " + IMAGE_SECONDS + "s linear";
+        requestAnimationFrame(function () { bar.style.width = "100%"; });
+        imageTimer = setTimeout(finish, IMAGE_SECONDS * 1000);
+      });
+      media.addEventListener("error", function () { ready(); left = 0; renderSkip(); });
+      media.src = ad.src;
+    }
+    var imageTimer = null;
 
     document.body.appendChild(root);
     document.body.classList.add("is-locked");
     requestAnimationFrame(function () { root.classList.add("is-open"); });
     track(ad, "view");
 
-    // Skip taymeri (video yuklanmasa ham 3 soniyadan keyin o'tkazish mumkin)
+    // Skip taymeri (media yuklanmasa ham 3 soniyadan keyin o'tkazish mumkin)
     var left = SKIP_AFTER;
     function renderSkip() {
       if (left > 0) {
@@ -125,20 +163,20 @@
       if (left <= 0) clearInterval(timer);
     }, 1000);
 
-    var playing = video.play();
-    if (playing && playing.catch) playing.catch(function () {});
-    video.addEventListener("timeupdate", function () {
-      if (video.duration) bar.style.width = (video.currentTime / video.duration) * 100 + "%";
-    });
-    video.addEventListener("ended", function () { finish(); });
+    if (isVideo) {
+      var playing = media.play();
+      if (playing && playing.catch) playing.catch(function () {});
+    }
 
-    sound.addEventListener("click", function () {
-      video.muted = !video.muted;
-      if (!video.muted && video.paused) video.play().catch(function () {});
-      sound.innerHTML = IB.icon(video.muted ? "volumeX" : "volume");
-      sound.setAttribute("aria-pressed", video.muted ? "false" : "true");
-      sound.setAttribute("aria-label", t(video.muted ? "ad.soundOn" : "ad.soundOff"));
-    });
+    if (sound) {
+      sound.addEventListener("click", function () {
+        media.muted = !media.muted;
+        if (!media.muted && media.paused) media.play().catch(function () {});
+        sound.innerHTML = IB.icon(media.muted ? "volumeX" : "volume");
+        sound.setAttribute("aria-pressed", media.muted ? "false" : "true");
+        sound.setAttribute("aria-label", t(media.muted ? "ad.soundOn" : "ad.soundOff"));
+      });
+    }
 
     // Reklamaga bosish: havola yangi oynada (brauzerning o'zi ochadi), bu oynada — tanlangan mashina
     function onAdClick() {
@@ -163,8 +201,10 @@
       if (done) return;
       done = true;
       clearInterval(timer);
-      video.pause();
+      clearTimeout(imageTimer);
       document.removeEventListener("keydown", onKey);
+      // Oynani yopib, keyin o'tamiz — "Orqaga" qaytganda sahifa qulflanib qolmasin
+      closeAll();
       IB.navigate(carUrl);
     }
   }

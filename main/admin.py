@@ -250,13 +250,17 @@ class AdAdmin(admin.ModelAdmin):
     search_fields = ("title", "advertiser", "link")
     readonly_fields = ("player", "views", "clicks", "skips", "ctr_col", "created_at")
     fieldsets = (
-        ("Reklama", {"fields": ("title", "advertiser", "video", "player", "link")}),
+        ("Reklama", {"fields": ("title", "advertiser", "video", "image", "player", "link"),
+                     "description": "Video <b>yoki</b> rasm yuklang (ikkalasi emas)."}),
         ("Koʻrsatish", {"fields": ("is_active", ("starts_on", "ends_on"), "order", "price")}),
         ("Statistika", {"fields": (("views", "clicks", "ctr_col", "skips"), "created_at")}),
     )
 
-    @admin.display(description="Video")
+    @admin.display(description="Media")
     def preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="height:54px;width:96px;object-fit:cover;border-radius:6px">',
+                               obj.image.url)
         if not obj.video:
             return "—"
         return format_html('<video src="{}" muted playsinline preload="metadata" '
@@ -265,6 +269,9 @@ class AdAdmin(admin.ModelAdmin):
 
     @admin.display(description="Koʻrinish")
     def player(self, obj):
+        if obj.pk and obj.image:
+            return format_html('<img src="{}" style="max-height:320px;max-width:100%;border-radius:8px">',
+                               obj.image.url)
         if not obj.pk or not obj.video:
             return "Saqlangandan keyin shu yerda koʻrinadi"
         return format_html('<video src="{}" controls muted playsinline style="max-height:320px;max-width:100%;'
