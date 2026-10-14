@@ -38,7 +38,7 @@ CSRF_TRUSTED_ORIGINS = ['https://inomarkabor.pythonanywhere.com']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'config.apps.InomarkaAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -160,4 +160,6 @@ SITE = {
     'map_query': 'Tashkent, Uzbekistan',
     'usd_to_uzs': 12100,
     'show_uzs': True,
+    # Mijoz mashinasini saytga joylash (reklama) narxi, so'm — qabul qilishda o'zgartirsa bo'ladi
+    'ad_fee_default': 300000,
 }

@@ -1,0 +1,128 @@
+{% extends "admin/index.html" %}
+{% load car_tags %}
+{% block content %}
+<div class="ib-dash">
+
+  <div class="ib-dash__head">
+    <div>
+      <h2>{{ dash.month_name }}</h2>
+      <p>Solishtirish: oʻtgan oy ({{ dash.prev_name }}) va oʻtgan yilning shu oyi ({{ dash.ly_name }})</p>
+    </div>
+    <div class="ib-dash__quick">
+      <a class="ib-btn{% if dash.pending_count %} ib-btn--ok{% endif %}" href="{% url 'admin:main_selllead_changelist' %}?state__exact=new">Yangi sotish arizalari: <b>{{ dash.pending_count }}</b></a>
+      <a class="ib-btn" href="{% url 'admin:main_contactlead_changelist' %}?state__exact=new">Yangi murojaatlar: <b>{{ dash.contact_new }}</b></a>
+      <a class="ib-btn" href="{% url 'admin:main_car_add' %}">+ Mashina qoʻshish</a>
+      <a class="ib-btn" href="/" target="_blank">Saytni ochish ↗</a>
+    </div>
+  </div>
+
+  <!-- KPI kartochkalar -->
+  <div class="ib-kpis">
+    {% for k in dash.kpis %}
+    <div class="ib-kpi">
+      <div class="ib-kpi__title">{{ k.title }}</div>
+      <div class="ib-kpi__value">{% if k.key == "sold_sum" %}{{ k.value|usd }}{% else %}{{ k.value|spaced }}{% if k.money %} <small>soʻm</small>{% endif %}{% endif %}</div>
+      <div class="ib-kpi__unit">{% if not k.money %}{{ k.unit }}{% endif %}</div>
+      <dl class="ib-kpi__cmp">
+        <div>
+          <dt>Oʻtgan oy</dt>
+          <dd>{% if k.key == "sold_sum" %}{{ k.prev|usd }}{% else %}{{ k.prev|spaced }}{% endif %}
+            <span class="ib-delta ib-delta--{{ k.vs_prev.dir }}">{% if k.vs_prev.dir == "up" %}▲{% elif k.vs_prev.dir == "down" %}▼{% else %}●{% endif %} {% if k.vs_prev.pct is not None %}{{ k.vs_prev.pct }}%{% elif k.vs_prev.dir == "up" %}yangi{% else %}oʻzgarmadi{% endif %}</span></dd>
+        </div>
+        <div>
+          <dt>Oʻtgan yil</dt>
+          <dd>{% if k.key == "sold_sum" %}{{ k.ly|usd }}{% else %}{{ k.ly|spaced }}{% endif %}
+            <span class="ib-delta ib-delta--{{ k.vs_ly.dir }}">{% if k.vs_ly.dir == "up" %}▲{% elif k.vs_ly.dir == "down" %}▼{% else %}●{% endif %} {% if k.vs_ly.pct is not None %}{{ k.vs_ly.pct }}%{% elif k.vs_ly.dir == "up" %}yangi{% else %}oʻzgarmadi{% endif %}</span></dd>
+        </div>
+      </dl>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 12 oylik grafiklar (har biri bitta o'q, bitta ko'rsatkich) -->
+  <div class="ib-charts">
+    <section class="ib-panel">
+      <h3>Baraka boʻldi — oxirgi 12 oy <small>sotilgan mashinalar soni</small></h3>
+      <div class="ib-bars" role="img" aria-label="Oylar boʻyicha sotilgan mashinalar soni">
+        {% for r in dash.series %}
+        <div class="ib-bar{% if r.current %} is-current{% endif %}" data-tip="{{ r.title }}: {{ r.sold }} ta">
+          <span class="ib-bar__val">{% if r.current or r.sold_h == 100.0 %}{{ r.sold }}{% endif %}</span>
+          <span class="ib-bar__fill" style="height:{{ r.sold_h|stringformat:'s' }}%"></span>
+          <span class="ib-bar__label">{{ r.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="ib-panel">
+      <h3>Reklama tushumi — oxirgi 12 oy <small>soʻm</small></h3>
+      <div class="ib-bars" role="img" aria-label="Oylar boʻyicha reklama tushumi">
+        {% for r in dash.series %}
+        <div class="ib-bar{% if r.current %} is-current{% endif %}" data-tip="{{ r.title }}: {{ r.ad_income|spaced }} soʻm">
+          <span class="ib-bar__val">{% if r.current or r.ad_income_h == 100.0 %}{{ r.ad_income|spaced }}{% endif %}</span>
+          <span class="ib-bar__fill" style="height:{{ r.ad_income_h|stringformat:'s' }}%"></span>
+          <span class="ib-bar__label">{{ r.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+  <details class="ib-panel ib-table-view">
+    <summary>Jadval koʻrinishi</summary>
+    <table>
+      <thead><tr><th>Oy</th><th>Baraka boʻldi</th><th>Reklama tushumi, soʻm</th></tr></thead>
+      <tbody>{% for r in dash.series %}<tr><td>{{ r.title }}</td><td>{{ r.sold }}</td><td>{{ r.ad_income|spaced }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </details>
+
+  <div class="ib-grid2">
+    <!-- Yillik solishtirish -->
+    <section class="ib-panel">
+      <h3>{{ dash.year }}-yil — oʻtgan yilning shu davri bilan</h3>
+      <table class="ib-table">
+        <thead><tr><th></th><th>{{ dash.year }}</th><th>{{ dash.year|add:"-1" }}</th><th>Oʻzgarish</th></tr></thead>
+        <tbody>
+          {% for r in dash.year_rows %}
+          <tr>
+            <th>{{ r.title }}</th>
+            <td>{% if r.money and r.title == "Sotuvlar summasi" %}{{ r.cur|usd }}{% else %}{{ r.cur|spaced }}{% endif %}</td>
+            <td>{% if r.money and r.title == "Sotuvlar summasi" %}{{ r.prev|usd }}{% else %}{{ r.prev|spaced }}{% endif %}</td>
+            <td><span class="ib-delta ib-delta--{{ r.change.dir }}">{% if r.change.dir == "up" %}▲{% elif r.change.dir == "down" %}▼{% else %}●{% endif %} {% if r.change.pct is not None %}{{ r.change.pct }}%{% else %}—{% endif %}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="ib-muted">Hozir sotuvda: <b>{{ dash.for_sale }}</b> · Bron qilingan: <b>{{ dash.reserved }}</b></p>
+    </section>
+
+    <!-- Ko'rib chiqilishi kerak bo'lgan arizalar -->
+    <section class="ib-panel">
+      <h3>Koʻrib chiqilmagan sotish arizalari <small>{{ dash.pending_count }} ta</small></h3>
+      {% if dash.pending %}
+      <ul class="ib-list">
+        {% for l in dash.pending %}
+        <li>
+          {% with photo=l.photos.all.0 %}{% if photo %}<img src="{{ photo.image.url }}" alt="">{% else %}<span class="ib-noimg">—</span>{% endif %}{% endwith %}
+          <div>
+            <b>{{ l.brand }} {{ l.model }} {{ l.year|default_if_none:"" }}</b>
+            <span>{{ l.name }} · {{ l.phone }}{% if l.budget %} · {{ l.budget|usd }}{% endif %}</span>
+          </div>
+          <span class="ib-list__actions">
+            <a class="ib-btn ib-btn--ok" href="{% url 'admin:main_selllead_accept' l.pk %}">✓ Qabul</a>
+            <a class="ib-btn ib-btn--no" href="{% url 'admin:main_selllead_reject' l.pk %}">✕ Rad</a>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="ib-muted">Hamma arizalar koʻrib chiqilgan.</p>
+      {% endif %}
+      <h3 style="margin-top:18px">Oxirgi sotuvlar</h3>
+      <ul class="ib-list ib-list--plain">
+        {% for c in dash.recent_sold %}<li><div><b>{{ c.title }} {{ c.year }}</b><span>{{ c.price|usd }} · {{ c.sold_at|date:"d.m.Y" }}</span></div></li>{% empty %}<li class="ib-muted">Hali sotuv yoʻq</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{{ block.super }}
+{% endblock %}
+{% block sidebar %}{% endblock %}

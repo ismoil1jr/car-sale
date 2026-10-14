@@ -113,8 +113,15 @@ class Car(models.Model):
     features = models.ManyToManyField(Feature, verbose_name="Qulayliklar", blank=True, related_name="cars")
     video_url = models.URLField("Video havola (Instagram/YouTube)", blank=True)
 
+    class Source(models.TextChoices):
+        OWN = "own", "Oʻzimizniki"
+        CLIENT = "client", "Mijoz arizasi (reklama)"
+
     status = models.CharField("Holati", max_length=10, choices=Status.choices, default=Status.AVAILABLE,
                               db_index=True)
+    source = models.CharField("Manba", max_length=10, choices=Source.choices, default=Source.OWN,
+                              help_text="Mijoz arizasidan qoʻshilgan eʼlon — reklama hisoblanadi")
+    ad_fee = models.PositiveIntegerField("Reklama toʻlovi, soʻm", default=0)
     featured = models.BooleanField("TOP eʼlon", default=False)
     posted_at = models.DateField("Eʼlon sanasi", default=timezone.localdate)
     sold_at = models.DateField("Sotilgan sana", null=True, blank=True)
@@ -207,6 +214,8 @@ class Lead(models.Model):
     class State(models.TextChoices):
         NEW = "new", "Yangi"
         PROGRESS = "progress", "Jarayonda"
+        ACCEPTED = "accepted", "Qabul qilingan"
+        REJECTED = "rejected", "Rad etilgan"
         DONE = "done", "Yakunlangan"
 
     kind = models.CharField("Turi", max_length=10, choices=Kind.choices, default=Kind.OTHER)
@@ -227,7 +236,9 @@ class Lead(models.Model):
 
     car = models.ForeignKey(Car, verbose_name="Bogʻliq avtomobil", null=True, blank=True,
                             on_delete=models.SET_NULL, related_name="leads")
-    created_at = models.DateTimeField("Kelgan vaqt", auto_now_add=True)
+    created_at = models.DateTimeField("Kelgan vaqt", auto_now_add=True, db_index=True)
+    decided_at = models.DateTimeField("Koʻrib chiqilgan vaqt", null=True, blank=True)
+    reject_reason = models.TextField("Rad etish sababi", blank=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -245,3 +256,35 @@ class LeadPhoto(models.Model):
     class Meta:
         verbose_name = "Ariza rasmi"
         verbose_name_plural = "Ariza rasmlari"
+
+
+class SellLeadManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(kind=Lead.Kind.SELL)
+
+
+class ContactLeadManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().exclude(kind=Lead.Kind.SELL)
+
+
+class SellLead(Lead):
+    """Admin uchun: "Mashinangizni soting" arizalari (qabul qilish / rad etish)."""
+
+    objects = SellLeadManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Sotish arizasi"
+        verbose_name_plural = "Sotish arizalari"
+
+
+class ContactLead(Lead):
+    """Admin uchun: aloqa sahifasidan kelgan murojaatlar."""
+
+    objects = ContactLeadManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = "Murojaat"
+        verbose_name_plural = "Murojaatlar"

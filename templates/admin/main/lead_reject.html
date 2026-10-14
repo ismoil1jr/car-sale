@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Dashboard</a> › <a href="{% url 'admin:main_selllead_changelist' %}">Sotish arizalari</a> › Rad etish</div>{% endblock %}
+{% block content %}
+<div class="ib-dash">
+  <form method="post" class="ib-panel ib-form">{% csrf_token %}
+    <h3>Arizani rad etish: {{ lead.brand }} {{ lead.model }} {{ lead.year|default_if_none:"" }}</h3>
+    <p class="ib-muted">{{ lead.name }} · {{ lead.phone }}. Rad etilgan ariza «Rad etilgan» filtrida saqlanib qoladi.</p>
+    <div class="ib-field full">{{ form.reason.label_tag }}{{ form.reason }}</div>
+    <div class="ib-form__actions">
+      <button type="submit" class="ib-btn ib-btn--no ib-btn--lg">✕ Rad etish</button>
+      <a class="ib-btn" href="{% url 'admin:main_selllead_changelist' %}">Bekor qilish</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

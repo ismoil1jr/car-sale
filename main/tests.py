@@ -123,3 +123,57 @@ class FooterTests(TestCase):
         self.assertIn("?body=sedan", footer)
         self.assertIn("?fuel=electric", footer)
         self.assertNotIn("?brand=", footer)
+
+
+class AdminReviewTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.admin = User.objects.create_superuser("boss", "b@x.uz", "pass12345")
+        self.client.force_login(self.admin)
+        self.lead = Lead.objects.create(kind="sell", name="Vali", phone="+998901234567", brand="Kia",
+                                        model="K5", year=2021, mileage=40000, budget=21000, paint="clean",
+                                        message="Bitta egasi")
+
+    def test_accept_creates_car_on_site(self):
+        url = reverse("admin:main_selllead_accept", args=[self.lead.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(page.context["form"].initial["brand_name"], "Kia")
+        data = {"brand_name": "Kia", "model": "K5", "trim": "", "year": 2021, "mileage": 40000, "price": 21000,
+                "negotiable": "on", "body": "sedan", "fuel": "petrol", "transmission": "automatic", "drive": "fwd",
+                "engine": "", "power": "", "color": "white", "condition": "clean", "seats": 5,
+                "description_uz": "Bitta egasi", "description_ru": "", "ad_fee": 300000}
+        r = self.client.post(url, data)
+        self.assertRedirects(r, reverse("admin:main_selllead_changelist"))
+        self.lead.refresh_from_db()
+        self.assertEqual(self.lead.state, "accepted")
+        car = self.lead.car
+        self.assertEqual((car.source, car.ad_fee, car.status), ("client", 300000, "available"))
+        self.assertIn(car, self.client.get(reverse("catalog")).context["cars"])
+
+    def test_reject(self):
+        r = self.client.post(reverse("admin:main_selllead_reject", args=[self.lead.pk]), {"reason": "Narx baland"})
+        self.assertRedirects(r, reverse("admin:main_selllead_changelist"))
+        self.lead.refresh_from_db()
+        self.assertEqual((self.lead.state, self.lead.reject_reason), ("rejected", "Narx baland"))
+        self.assertFalse(Car.objects.exists())
+        rejected = self.client.get(reverse("admin:main_selllead_changelist") + "?state__exact=rejected")
+        self.assertContains(rejected, "Vali")
+
+    def test_dashboard(self):
+        from datetime import date
+        from django.utils import timezone
+        today = timezone.localdate()
+        make_car(model="A", status="sold", sold_at=today)
+        make_car(model="B", status="sold", sold_at=date(today.year - 1, today.month, 1))
+        make_car(model="C", source="client", ad_fee=300000)
+        r = self.client.get(reverse("admin:index"))
+        self.assertEqual(r.status_code, 200)
+        kpis = {k["key"]: k for k in r.context["dash"]["kpis"]}
+        self.assertEqual(kpis["sold"]["value"], 1)
+        self.assertEqual(kpis["sold"]["ly"], 1)
+        self.assertEqual(kpis["ad_income"]["value"], 300000)
+        self.assertEqual(r.context["dash"]["pending_count"], 1)
+        self.assertContains(r, "Reklama tushumi")
+        for name in ("main_car", "main_selllead", "main_contactlead"):
+            self.assertEqual(self.client.get(reverse(f"admin:{name}_changelist")).status_code, 200, name)
