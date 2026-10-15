@@ -23,6 +23,7 @@ def period(start, end):
     ads = Car.objects.filter(source=Car.Source.CLIENT, posted_at__gte=start, posted_at__lt=end)
     video = Ad.objects.filter(starts_on__gte=start, starts_on__lt=end).aggregate(n=Count("id"), total=Sum("price"))
     leads = Lead.objects.filter(created_at__date__gte=start, created_at__date__lt=end)
+    decided = Lead.objects.filter(decided_at__date__gte=start, decided_at__date__lt=end)
     s = sold.aggregate(n=Count("id"), total=Sum("price"))
     a = ads.aggregate(n=Count("id"), total=Sum("ad_fee"))
     return {
@@ -32,8 +33,9 @@ def period(start, end):
         "ad_income": (a["total"] or 0) + (video["total"] or 0),
         "leads": leads.count(),
         "sell_leads": leads.filter(kind=Lead.Kind.SELL).count(),
-        "accepted": leads.filter(state=Lead.State.ACCEPTED).count(),
-        "rejected": leads.filter(state=Lead.State.REJECTED).count(),
+        "accepted": decided.filter(state=Lead.State.ACCEPTED).count(),
+        "rejected": decided.filter(state=Lead.State.REJECTED).count(),
+        "done": decided.filter(state=Lead.State.DONE).count(),
     }
 
 
@@ -114,6 +116,9 @@ def context():
                           "money": key in ("sold_sum", "ad_income")})
 
     series = monthly_series()
+    pending = Lead.objects.filter(state__in=Lead.PENDING_STATES)
+    pending_sell = pending.filter(kind=Lead.Kind.SELL)
+    pending_contact = pending.exclude(kind=Lead.Kind.SELL)
     return {
         "dash": {
             "chart": {
@@ -123,18 +128,22 @@ def context():
                 "ad_income": [r["ad_income"] for r in series],
             },
             "month_name": f"{UZ_MONTHS[today.month - 1]} {today.year}",
+            "updated_at": timezone.localtime(),
             "prev_name": f"{UZ_MONTHS[prev_m.month - 1]} {prev_m.year}",
             "ly_name": f"{UZ_MONTHS[ly_m.month - 1]} {ly_m.year}",
             "year": today.year,
             "kpis": kpis,
             "year_rows": year_rows,
             "series": series,
-            "pending": Lead.objects.filter(kind=Lead.Kind.SELL, state=Lead.State.NEW)
-                       .prefetch_related("photos")[:6],
-            "pending_count": Lead.objects.filter(kind=Lead.Kind.SELL, state=Lead.State.NEW).count(),
-            "contact_new": Lead.objects.exclude(kind=Lead.Kind.SELL).filter(state=Lead.State.NEW).count(),
+            "pending": pending_sell.prefetch_related("photos")[:6],
+            "pending_count": pending_sell.count(),
+            "contacts": pending_contact.select_related("car__brand")[:5],
+            "contact_new": pending_contact.count(),
+            "leads_month": {"in": cur["leads"], "accepted": cur["accepted"], "rejected": cur["rejected"],
+                            "done": cur["done"]},
             "for_sale": Car.objects.filter(status=Car.Status.AVAILABLE).count(),
             "reserved": Car.objects.filter(status=Car.Status.RESERVED).count(),
+            "total_cars": Car.objects.count(),
             "video_ads": Ad.objects.all()[:8],
             "recent_sold": Car.objects.filter(status=Car.Status.SOLD).select_related("brand")
                            .order_by("-sold_at", "-id")[:5],

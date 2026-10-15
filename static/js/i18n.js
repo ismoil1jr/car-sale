@@ -197,6 +197,7 @@ window.IB_I18N = {
     "car.askTelegram": "Telegramʼda soʻrash",
     "car.findSimilar": "Oʻxshashini topib bering",
     "car.video": "Video",
+    "car.fullVideo": "Toʻliq video",
     "car.seller": "{years} yillik tajriba · Tasdiqlangan sotuvchi",
     "car.photoCredit": "Foto",
 
@@ -571,6 +572,7 @@ window.IB_I18N = {
     "car.askTelegram": "Спросить в Telegram",
     "car.findSimilar": "Найдите похожий",
     "car.video": "Видео",
+    "car.fullVideo": "Полное видео",
     "car.seller": "{years} лет опыта · Проверенный продавец",
     "car.photoCredit": "Фото",
     "car.similarEyebrow": "Вам может понравиться",

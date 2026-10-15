@@ -60,10 +60,11 @@ class AcceptLeadForm(forms.ModelForm):
         model = Car
         fields = ["model", "trim", "year", "mileage", "price", "negotiable", "body", "fuel", "transmission",
                   "drive", "engine", "power", "color", "condition", "seats", "description_uz", "description_ru",
-                  "featured", "ad_fee"]
+                  "video_url", "featured", "ad_fee"]
         widgets = {
             "description_uz": forms.Textarea(attrs={"rows": 4}),
             "description_ru": forms.Textarea(attrs={"rows": 4}),
+            "video_url": forms.URLInput(attrs={"placeholder": "https://youtu.be/... yoki https://www.instagram.com/reel/..."}),
         }
 
     field_order = ["brand_name"]

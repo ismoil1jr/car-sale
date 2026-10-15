@@ -142,7 +142,8 @@ class AdminReviewTests(TestCase):
         data = {"brand_name": "Kia", "model": "K5", "trim": "", "year": 2021, "mileage": 40000, "price": 21000,
                 "negotiable": "on", "body": "sedan", "fuel": "petrol", "transmission": "automatic", "drive": "fwd",
                 "engine": "", "power": "", "color": "white", "condition": "clean", "seats": 5,
-                "description_uz": "Bitta egasi", "description_ru": "", "ad_fee": 300000}
+                "description_uz": "Bitta egasi", "description_ru": "", "ad_fee": 300000,
+                "video_url": "https://youtu.be/dQw4w9WgXcQ"}
         r = self.client.post(url, data)
         self.assertRedirects(r, reverse("admin:main_selllead_changelist"))
         self.lead.refresh_from_db()
@@ -150,6 +151,14 @@ class AdminReviewTests(TestCase):
         car = self.lead.car
         self.assertEqual((car.source, car.ad_fee, car.status), ("client", 300000, "available"))
         self.assertIn(car, self.client.get(reverse("catalog")).context["cars"])
+        self.assertEqual(car.video_url, "https://youtu.be/dQw4w9WgXcQ")
+        # qabul qilingan ariza ro'yxatdan ketadi, arxiv filtrida qoladi
+        pending = self.client.get(reverse("admin:main_selllead_changelist"))
+        self.assertEqual(list(pending.context["cl"].result_list), [])
+        archive = self.client.get(reverse("admin:main_selllead_changelist") + "?holat=all")
+        self.assertEqual(list(archive.context["cl"].result_list), [self.lead])
+        dash = self.client.get(reverse("admin:index")).context["dash"]
+        self.assertEqual((dash["pending_count"], dash["leads_month"]["accepted"]), (0, 1))
 
     def test_reject(self):
         r = self.client.post(reverse("admin:main_selllead_reject", args=[self.lead.pk]), {"reason": "Narx baland"})
@@ -157,8 +166,12 @@ class AdminReviewTests(TestCase):
         self.lead.refresh_from_db()
         self.assertEqual((self.lead.state, self.lead.reject_reason), ("rejected", "Narx baland"))
         self.assertFalse(Car.objects.exists())
-        rejected = self.client.get(reverse("admin:main_selllead_changelist") + "?state__exact=rejected")
+        rejected = self.client.get(reverse("admin:main_selllead_changelist") + "?holat=rejected")
         self.assertContains(rejected, "Vali")
+        # qayta rad etib/qabul qilib bo'lmaydi
+        again = self.client.post(reverse("admin:main_selllead_accept", args=[self.lead.pk]), {})
+        self.assertRedirects(again, reverse("admin:main_selllead_changelist"))
+        self.assertFalse(Car.objects.exists())
 
     def test_dashboard(self):
         from datetime import date
@@ -270,3 +283,66 @@ class ImageAdTests(TestCase):
                 Ad(title="Bo'sh", link="https://example.uz").full_clean()
         finally:
             ad.image.delete(save=False)
+
+
+class ContactLeadReviewTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.client.force_login(User.objects.create_superuser("boss", "b@x.uz", "pass12345"))
+        self.a = Lead.objects.create(kind="find", name="Ali", phone="+998901112233", message="Tahoe kerak")
+        self.b = Lead.objects.create(kind="buy", name="Sardor", phone="+998901112244", message="LX narxi?")
+        self.url = reverse("admin:main_contactlead_changelist")
+
+    def listed(self, query=""):
+        return set(self.client.get(self.url + query).context["cl"].result_list)
+
+    def test_done_action_removes_from_list(self):
+        self.assertEqual(self.listed(), {self.a, self.b})
+        r = self.client.post(self.url, {"action": "mark_done", "_selected_action": [self.a.pk]})
+        self.assertEqual(r.status_code, 302)
+        self.a.refresh_from_db()
+        self.assertEqual(self.a.state, "done")
+        self.assertIsNotNone(self.a.decided_at)
+        self.assertEqual(self.listed(), {self.b})
+        self.assertEqual(self.listed("?holat=done"), {self.a})
+        self.assertEqual(self.listed("?holat=all"), {self.a, self.b})
+        self.assertEqual(self.client.get(reverse("admin:index")).context["dash"]["contact_new"], 1)
+
+    def test_sell_leads_not_in_contacts(self):
+        Lead.objects.create(kind="sell", name="Vali", phone="+998901234567", brand="Kia", model="K5")
+        self.assertEqual(self.listed("?holat=all"), {self.a, self.b})
+
+
+class DashboardLiveTests(TestCase):
+    def test_live_endpoint(self):
+        from django.contrib.auth.models import User
+        url = reverse("admin:dashboard_live")
+        self.assertEqual(self.client.get(url).status_code, 302)  # login talab qilinadi
+        self.client.force_login(User.objects.create_superuser("boss", "b@x.uz", "pass12345"))
+        Lead.objects.create(kind="sell", name="Vali", phone="+998901234567", brand="Kia", model="K5")
+        data = self.client.get(url).json()
+        self.assertEqual(data["pending"], 1)
+        self.assertIn("Kia K5", data["html"])
+        self.assertEqual(len(data["chart"]["sold"]), 12)
+        self.assertContains(self.client.get(reverse("admin:index")), 'data-ib-live="/admin/dashboard/live/"')
+
+
+class CarVideoTests(TestCase):
+    def test_youtube_embed_and_button(self):
+        car = make_car(video_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10")
+        self.assertEqual(car.youtube_embed, "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ")
+        html = self.client.get(car.get_absolute_url()).content.decode()
+        self.assertIn("youtube-nocookie.com/embed/dQw4w9WgXcQ", html)
+        self.assertIn("Toʻliq video", html)
+
+    def test_instagram_link_without_player(self):
+        car = make_car(video_url="https://www.instagram.com/reel/ABC123/")
+        self.assertEqual(car.youtube_embed, "")
+        html = self.client.get(car.get_absolute_url()).content.decode()
+        self.assertIn('href="https://www.instagram.com/reel/ABC123/"', html)
+        self.assertNotIn("<iframe", html)
+
+    def test_admin_add_form_has_video_field(self):
+        from django.contrib.auth.models import User
+        self.client.force_login(User.objects.create_superuser("boss", "b@x.uz", "pass12345"))
+        self.assertContains(self.client.get(reverse("admin:main_car_add")), 'name="video_url"')

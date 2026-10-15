@@ -95,7 +95,8 @@
                 <button class="btn btn--tg btn--lg btn--block" type="button" data-action="tg"><i data-icon="telegram"></i><span data-i18n="car.askTelegram">Telegramʼda soʻrash</span></button>
                 {% endif %}
                 <div class="car-actions__row">
-                  <a class="btn" href="{{ car.video_url|default:'https://www.instagram.com/' }}{% if not car.video_url %}{{ SITE.instagram }}/{% endif %}" target="_blank" rel="noopener"><i data-icon="play"></i><span data-i18n="car.video">Video</span></a>
+                  {% if car.video_url %}<a class="btn" href="{{ car.video_url }}" target="_blank" rel="noopener"><i data-icon="play"></i><span data-i18n="car.fullVideo">Toʻliq video</span></a>
+                  {% else %}<a class="btn" href="https://www.instagram.com/{{ SITE.instagram }}/" target="_blank" rel="noopener"><i data-icon="play"></i><span data-i18n="car.video">Video</span></a>{% endif %}
                   <button class="btn" type="button" data-action="share"><i data-icon="share"></i><span data-i18n="cta.share">Ulashish</span></button>
                 </div>
               </div>
@@ -123,6 +124,11 @@
                 <div class="spec"><span class="spec__icon"><i data-icon="clock"></i></span><div><dt data-i18n="spec.posted">Eʼlon sanasi</dt><dd>{% uzdate car.posted_at %}</dd></div></div>
               </dl>
             </section>
+            {% if car.youtube_embed %}
+            <section class="car-section" id="video"><h2 data-i18n="car.fullVideo">Toʻliq video</h2>
+              <div class="car-video"><iframe src="{{ car.youtube_embed }}" title="{{ car.title }} — video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+            </section>
+            {% endif %}
             {% if car.description_uz or car.description_ru %}
             <section class="car-section"><h2 data-i18n="car.description">Tavsif</h2>
               <p class="description" data-l="uz">{{ car.description_uz }}</p>

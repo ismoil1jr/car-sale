@@ -41,7 +41,7 @@
           {% if form.errors %}<div class="alert alert-danger">Belgilangan maydonlarni tekshiring.</div>{% endif %}
           <div class="row g-3">
             {% for field in form %}
-            <div class="{% if field.name == 'description_uz' or field.name == 'description_ru' %}col-12{% else %}col-md-4 col-sm-6{% endif %}">
+            <div class="{% if field.name == 'description_uz' or field.name == 'description_ru' or field.name == 'video_url' %}col-12{% else %}col-md-4 col-sm-6{% endif %}">
               {% if field.field.widget.input_type == "checkbox" %}
               <div class="form-check mt-4">{{ field }} <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
               {% else %}

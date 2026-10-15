@@ -56,8 +56,8 @@ def make_reserved(modeladmin, request, queryset):
 
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
-    list_display = ("thumb", "title_col", "year", "price", "mileage", "source", "status", "featured", "posted_at",
-                    "site_link")
+    list_display = ("thumb", "title_col", "year", "price", "mileage", "source", "status", "featured", "has_video",
+                    "posted_at", "site_link")
     list_display_links = ("thumb", "title_col")
     list_editable = ("status", "featured")
     list_filter = ("status", "source", "featured", "brand", "body", "fuel", "condition", "year")
@@ -68,13 +68,14 @@ class CarAdmin(admin.ModelAdmin):
     filter_horizontal = ("features",)
     autocomplete_fields = ("brand",)
     inlines = [CarImageInline]
+    readonly_fields = ("video_preview",)
     actions = [make_available, make_reserved, make_sold]
     fieldsets = (
         ("Asosiy", {"fields": ("brand", "model", "trim", "slug", ("year", "reg_year"),
-                               ("price", "negotiable"), "mileage")}),
+                               ("price", "negotiable"), "mileage", "video_url", "video_preview")}),
         ("Texnik xususiyatlari", {"fields": (("body", "fuel"), ("transmission", "drive"),
                                              ("engine", "power"), ("color", "condition"), "seats")}),
-        ("Tavsif", {"fields": ("description_uz", "description_ru", "features", "video_url")}),
+        ("Tavsif", {"fields": ("description_uz", "description_ru", "features")}),
         ("Eʼlon holati", {"fields": ("status", "featured", ("posted_at", "sold_at"))}),
         ("Reklama", {"fields": (("source", "ad_fee"),)}),
     )
@@ -93,6 +94,19 @@ class CarAdmin(admin.ModelAdmin):
     @admin.display(description="Avtomobil", ordering="model")
     def title_col(self, obj):
         return obj.title
+
+    @admin.display(description="Video koʻrinishi")
+    def video_preview(self, obj):
+        if obj.youtube_embed:
+            return format_html('<div class="ib-video" style="max-width:480px"><iframe src="{}" allowfullscreen>'
+                               '</iframe></div>', obj.youtube_embed)
+        if obj.video_url:
+            return format_html('<a href="{0}" target="_blank" rel="noopener">{0} ↗</a>', obj.video_url)
+        return "Havola kiritilsa, saytda «Toʻliq video» tugmasi chiqadi"
+
+    @admin.display(description="Video", boolean=True)
+    def has_video(self, obj):
+        return bool(obj.video_url)
 
     @admin.display(description="Sayt")
     def site_link(self, obj):
@@ -119,6 +133,31 @@ STATE_BADGES = {
 }
 
 
+class ReviewStateFilter(admin.SimpleListFilter):
+    """Standart holatda faqat ko'rib chiqilmagan arizalar; qabul qilingan/rad etilganlar — arxivda."""
+
+    title = "Holati"
+    parameter_name = "holat"
+    PENDING, ALL = "pending", "all"
+
+    def lookups(self, request, model_admin):
+        return [(self.PENDING, "Koʻrib chiqilmagan"), *Lead.State.choices, (self.ALL, "Hammasi (arxiv bilan)")]
+
+    def choices(self, changelist):
+        current = self.value() or self.PENDING
+        for value, label in self.lookup_choices:
+            yield {"selected": current == value, "display": label,
+                   "query_string": changelist.get_query_string({self.parameter_name: value})}
+
+    def queryset(self, request, queryset):
+        value = self.value() or self.PENDING
+        if value == self.PENDING:
+            return queryset.filter(state__in=Lead.PENDING_STATES)
+        if value == self.ALL:
+            return queryset
+        return queryset.filter(state=value)
+
+
 def state_badge(obj):
     return format_html('<span class="badge rounded-pill {}">{}</span>',
                        STATE_BADGES.get(obj.state, "text-bg-secondary"), obj.get_state_display())
@@ -129,7 +168,7 @@ class SellLeadAdmin(admin.ModelAdmin):
     """Mashina sotish arizalari: ko'rib chiqish → qabul qilish (saytga chiqadi) yoki rad etish."""
 
     list_display = ("created_at", "car_col", "name", "phone", "budget", "photo_count", "state_col", "buttons")
-    list_filter = ("state", "created_at")
+    list_filter = (ReviewStateFilter, "created_at")
     search_fields = ("name", "phone", "brand", "model", "message")
     date_hierarchy = "created_at"
     readonly_fields = ("created_at", "decided_at", "car_link", "buttons")
@@ -142,6 +181,11 @@ class SellLeadAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("photos").select_related("car")
+
+    def save_model(self, request, obj, form, change):
+        if "state" in form.changed_data:
+            obj.decided_at = None if obj.state in Lead.PENDING_STATES else timezone.now()
+        super().save_model(request, obj, form, change)
 
     def get_urls(self):
         return [
@@ -164,7 +208,7 @@ class SellLeadAdmin(admin.ModelAdmin):
 
     @admin.display(description="Amallar")
     def buttons(self, obj):
-        if obj.state in (Lead.State.ACCEPTED, Lead.State.REJECTED):
+        if obj.state not in Lead.PENDING_STATES:
             if obj.car_id:
                 return format_html('<a class="btn btn-sm btn-outline-secondary" href="{}" target="_blank">'
                                    '<i class="fas fa-up-right-from-square"></i> Saytda</a>', obj.car.get_absolute_url())
@@ -187,7 +231,7 @@ class SellLeadAdmin(admin.ModelAdmin):
     # --- qabul qilish / rad etish ---
     def accept_view(self, request, pk):
         lead = get_object_or_404(SellLead, pk=pk)
-        if lead.state in (Lead.State.ACCEPTED, Lead.State.REJECTED):
+        if lead.state not in Lead.PENDING_STATES:
             messages.warning(request, "Bu ariza allaqachon koʻrib chiqilgan.")
             return redirect("admin:main_selllead_changelist")
         if request.method == "POST":
@@ -209,6 +253,9 @@ class SellLeadAdmin(admin.ModelAdmin):
 
     def reject_view(self, request, pk):
         lead = get_object_or_404(SellLead, pk=pk)
+        if lead.state not in Lead.PENDING_STATES:
+            messages.warning(request, "Bu ariza allaqachon koʻrib chiqilgan.")
+            return redirect("admin:main_selllead_changelist")
         if request.method == "POST":
             form = RejectLeadForm(request.POST)
             if form.is_valid():
@@ -225,19 +272,50 @@ class SellLeadAdmin(admin.ModelAdmin):
         })
 
 
+def _set_state(queryset, state):
+    closed = state not in Lead.PENDING_STATES
+    return queryset.update(state=state, decided_at=timezone.now() if closed else None)
+
+
+@admin.action(description="✓ Yakunlangan deb belgilash (roʻyxatdan ketadi)")
+def mark_done(modeladmin, request, queryset):
+    n = _set_state(queryset, Lead.State.DONE)
+    messages.success(request, f"{n} ta murojaat yakunlandi va arxivga oʻtdi.")
+
+
+@admin.action(description="Jarayonda deb belgilash")
+def mark_progress(modeladmin, request, queryset):
+    _set_state(queryset, Lead.State.PROGRESS)
+
+
+@admin.action(description="✗ Rad etish (roʻyxatdan ketadi)")
+def mark_rejected(modeladmin, request, queryset):
+    n = _set_state(queryset, Lead.State.REJECTED)
+    messages.info(request, f"{n} ta murojaat rad etildi va arxivga oʻtdi.")
+
+
 @admin.register(ContactLead)
 class ContactLeadAdmin(admin.ModelAdmin):
+    """Aloqa sahifasidan kelgan murojaatlar. Yakunlangan/rad etilganlar standart roʻyxatda koʻrinmaydi."""
+
     list_display = ("created_at", "kind", "name", "phone", "summary", "car", "state")
-    list_filter = ("state", "kind", "created_at")
+    list_filter = (ReviewStateFilter, "kind", "created_at")
     list_editable = ("state",)
+    list_select_related = ("car__brand",)
     search_fields = ("name", "phone", "message")
     date_hierarchy = "created_at"
-    readonly_fields = ("created_at",)
-    fields = ("kind", "state", "name", "phone", "budget", "message", "car", "created_at")
+    actions = [mark_done, mark_progress, mark_rejected]
+    readonly_fields = ("created_at", "decided_at")
+    fields = ("kind", "state", "name", "phone", "budget", "message", "car", "created_at", "decided_at")
 
     @admin.display(description="Xabar")
     def summary(self, obj):
         return (obj.message or "")[:80]
+
+    def save_model(self, request, obj, form, change):
+        if "state" in form.changed_data:
+            obj.decided_at = None if obj.state in Lead.PENDING_STATES else timezone.now()
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Ad)

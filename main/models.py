@@ -1,8 +1,12 @@
+import re
+
 from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+
+YOUTUBE_RE = re.compile(r"(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/)|youtu\.be/)([\w-]{11})")
 
 
 class Brand(models.Model):
@@ -111,7 +115,9 @@ class Car(models.Model):
     description_uz = models.TextField("Tavsif (uz)", blank=True)
     description_ru = models.TextField("Tavsif (ru)", blank=True)
     features = models.ManyToManyField(Feature, verbose_name="Qulayliklar", blank=True, related_name="cars")
-    video_url = models.URLField("Video havola (Instagram/YouTube)", blank=True)
+    video_url = models.URLField("Toʻliq video (havola)", max_length=500, blank=True,
+                                help_text="YouTube, Instagram yoki Telegram'dagi toʻliq videosharh havolasi. "
+                                          "YouTube boʻlsa — mashina sahifasida pleyer ochiladi.")
 
     class Source(models.TextChoices):
         OWN = "own", "Oʻzimizniki"
@@ -173,6 +179,12 @@ class Car(models.Model):
         super().save(*args, **kwargs)
 
     @property
+    def youtube_embed(self):
+        """YouTube havolasidan pleyer (embed) manzili; boshqa saytlar uchun bo'sh."""
+        m = YOUTUBE_RE.search(self.video_url or "")
+        return f"https://www.youtube-nocookie.com/embed/{m.group(1)}" if m else ""
+
+    @property
     def cover(self):
         """Birinchi rasm (prefetch qilingan bo'lsa qo'shimcha so'rov ketmaydi)."""
         images = list(self.images.all())
@@ -217,6 +229,9 @@ class Lead(models.Model):
         ACCEPTED = "accepted", "Qabul qilingan"
         REJECTED = "rejected", "Rad etilgan"
         DONE = "done", "Yakunlangan"
+
+    # Hali ko'rib chiqilmagan (ro'yxatda turadigan) holatlar; qolganlari — arxiv
+    PENDING_STATES = (State.NEW, State.PROGRESS)
 
     kind = models.CharField("Turi", max_length=10, choices=Kind.choices, default=Kind.OTHER)
     state = models.CharField("Holati", max_length=10, choices=State.choices, default=State.NEW, db_index=True)
