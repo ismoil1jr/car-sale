@@ -17,13 +17,22 @@ def add_months(d, n):
     return date(d.year + m // 12, m % 12 + 1, 1)
 
 
-def period(start, end):
-    """[start, end) oralig'idagi ko'rsatkichlar."""
-    sold = Car.objects.filter(status=Car.Status.SOLD, sold_at__gte=start, sold_at__lt=end)
-    ads = Car.objects.filter(source=Car.Source.CLIENT, posted_at__gte=start, posted_at__lt=end)
-    video = Ad.objects.filter(starts_on__gte=start, starts_on__lt=end).aggregate(n=Count("id"), total=Sum("price"))
-    leads = Lead.objects.filter(created_at__date__gte=start, created_at__date__lt=end)
-    decided = Lead.objects.filter(decided_at__date__gte=start, decided_at__date__lt=end)
+def _between(qs, field, start, end):
+    """[start, end) oralig'i; None — chegara yo'q (butun davr)."""
+    if start:
+        qs = qs.filter(**{f"{field}__gte": start})
+    if end:
+        qs = qs.filter(**{f"{field}__lt": end})
+    return qs
+
+
+def period(start=None, end=None):
+    """[start, end) oralig'idagi ko'rsatkichlar (start/end None bo'lsa — butun davr)."""
+    sold = _between(Car.objects.filter(status=Car.Status.SOLD), "sold_at", start, end)
+    ads = _between(Car.objects.filter(source=Car.Source.CLIENT), "posted_at", start, end)
+    video = _between(Ad.objects.all(), "starts_on", start, end).aggregate(n=Count("id"), total=Sum("price"))
+    leads = _between(Lead.objects.all(), "created_at__date", start, end)
+    decided = _between(Lead.objects.all(), "decided_at__date", start, end)
     s = sold.aggregate(n=Count("id"), total=Sum("price"))
     a = ads.aggregate(n=Count("id"), total=Sum("ad_fee"))
     return {
@@ -85,7 +94,13 @@ def monthly_series(months=12):
     return rows
 
 
-def context():
+SCOPES = [("month", "Bu oy"), ("year", "Bu yil"), ("all", "Hammasi")]
+
+
+def context(scope="month"):
+    """scope: "month" — joriy oy (o'tgan oy va o'tgan yil bilan solishtirish),
+    "year" — yil boshidan bugungacha, "all" — butun davr."""
+    scope = scope if scope in dict(SCOPES) else "month"
     today = timezone.localdate()
     this_m = today.replace(day=1)
     next_m = add_months(this_m, 1)
@@ -93,25 +108,43 @@ def context():
     ly_m = date(this_m.year - 1, this_m.month, 1)
     ly_next = add_months(ly_m, 1)
 
-    cur, prev, ly = period(this_m, next_m), period(prev_m, this_m), period(ly_m, ly_next)
-    year_cur = period(date(today.year, 1, 1), next_m)
+    year_start = date(today.year, 1, 1)
+    year_cur = period(year_start, next_m)
     year_prev = period(date(today.year - 1, 1, 1), date(today.year - 1, next_m.month, 1)
-                       if next_m.year == today.year else date(today.year, 1, 1))
+                       if next_m.year == today.year else year_start)
+    total = period()
+
+    if scope == "month":
+        cur = period(this_m, next_m)
+        prev, ly = period(prev_m, this_m), period(ly_m, ly_next)
+        title = f"{UZ_MONTHS[today.month - 1]} {today.year}"
+        subtitle = (f"Solishtirish: oʻtgan oy ({UZ_MONTHS[prev_m.month - 1]} {prev_m.year}) "
+                    f"va oʻtgan yilning shu oyi ({UZ_MONTHS[ly_m.month - 1]} {ly_m.year})")
+        cmp = [("Oʻtgan oy", prev), ("Oʻtgan yil", ly)]
+    elif scope == "year":
+        cur = year_cur
+        title = f"{today.year}-yil (1-yanvardan bugungacha)"
+        subtitle = f"Solishtirish: {today.year - 1}-yilning shu davri"
+        cmp = [(f"{today.year - 1}-yil shu davr", year_prev)]
+    else:
+        cur = total
+        title = "Butun davr"
+        subtitle = "Saytdagi barcha maʼlumotlar boʻyicha"
+        cmp = []
 
     kpis = []
-    for key, title, unit in KPIS:
+    for key, name, unit in KPIS:
+        rows = [(label, data[key], change(cur[key], data[key])) for label, data in cmp]
         kpis.append({
-            "key": key, "title": title, "unit": unit, "value": cur[key],
-            "prev": prev[key], "vs_prev": change(cur[key], prev[key]),
-            "ly": ly[key], "vs_ly": change(cur[key], ly[key]),
+            "key": key, "title": name, "unit": unit, "value": cur[key],
             "money": key in ("sold_sum", "ad_income"),
-            "cmp": [("Oʻtgan oy", prev[key], change(cur[key], prev[key])),
-                    ("Oʻtgan yil", ly[key], change(cur[key], ly[key]))],
+            "cmp": rows,
+            "total": total[key] if scope != "all" else None,
         })
 
     year_rows = []
-    for key, title, unit in KPIS:
-        year_rows.append({"title": title, "unit": unit, "cur": year_cur[key], "prev": year_prev[key],
+    for key, name, unit in KPIS:
+        year_rows.append({"key": key, "title": name, "unit": unit, "cur": year_cur[key], "prev": year_prev[key],
                           "change": change(year_cur[key], year_prev[key]),
                           "money": key in ("sold_sum", "ad_income")})
 
@@ -127,10 +160,11 @@ def context():
                 "sold": [r["sold"] for r in series],
                 "ad_income": [r["ad_income"] for r in series],
             },
-            "month_name": f"{UZ_MONTHS[today.month - 1]} {today.year}",
+            "scope": scope,
+            "scopes": SCOPES,
+            "title": title,
+            "subtitle": subtitle,
             "updated_at": timezone.localtime(),
-            "prev_name": f"{UZ_MONTHS[prev_m.month - 1]} {prev_m.year}",
-            "ly_name": f"{UZ_MONTHS[ly_m.month - 1]} {ly_m.year}",
             "year": today.year,
             "kpis": kpis,
             "year_rows": year_rows,
@@ -139,7 +173,7 @@ def context():
             "pending_count": pending_sell.count(),
             "contacts": pending_contact.select_related("car__brand")[:5],
             "contact_new": pending_contact.count(),
-            "leads_month": {"in": cur["leads"], "accepted": cur["accepted"], "rejected": cur["rejected"],
+            "leads_period": {"in": cur["leads"], "accepted": cur["accepted"], "rejected": cur["rejected"],
                             "done": cur["done"]},
             "for_sale": Car.objects.filter(status=Car.Status.AVAILABLE).count(),
             "reserved": Car.objects.filter(status=Car.Status.RESERVED).count(),

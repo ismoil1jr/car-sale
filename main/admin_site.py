@@ -13,7 +13,8 @@ class InomarkaAdminSite(admin.AdminSite):
     index_template = "admin/dashboard.html"
 
     def index(self, request, extra_context=None):
-        return super().index(request, {**dashboard.context(), **(extra_context or {})})
+        ctx = dashboard.context(request.GET.get("davr", "month"))
+        return super().index(request, {**ctx, **(extra_context or {})})
 
     def get_urls(self):
         return [
@@ -22,7 +23,7 @@ class InomarkaAdminSite(admin.AdminSite):
 
     def dashboard_live(self, request):
         """Dashboard maʼlumotlari sahifani qayta yuklamasdan (JS har 30 s soʻraydi). admin_view: login + keshsiz."""
-        ctx = dashboard.context()
+        ctx = dashboard.context(request.GET.get("davr", "month"))
         return JsonResponse({
             "html": render_to_string("admin/includes/dashboard_body.html", ctx, request),
             "chart": ctx["dash"]["chart"],

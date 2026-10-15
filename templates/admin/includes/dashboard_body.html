@@ -1,8 +1,11 @@
 {% load car_tags %}
   <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
     <div>
-      <h4 class="mb-1">{{ dash.month_name }}</h4>
-      <div class="text-body-secondary small">Solishtirish: oʻtgan oy ({{ dash.prev_name }}) va oʻtgan yilning shu oyi ({{ dash.ly_name }})</div>
+      <div class="btn-group btn-group-sm mb-2" role="group" aria-label="Davr">
+        {% for value, label in dash.scopes %}<a class="btn {% if value == dash.scope %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?davr={{ value }}">{{ label }}</a>{% endfor %}
+      </div>
+      <h4 class="mb-1">{{ dash.title }}</h4>
+      <div class="text-body-secondary small">{{ dash.subtitle }}</div>
       <div class="text-body-secondary small mt-1"><i class="fas fa-circle ib-live-dot me-1"></i>Jonli · yangilandi <span data-ib-updated>{{ dash.updated_at|date:"H:i:s" }}</span></div>
     </div>
     <div class="d-flex flex-wrap gap-2">
@@ -38,6 +41,12 @@
             </span>
           </div>
           {% endfor %}
+          {% if k.total is not None %}
+          <div class="d-flex justify-content-between small mt-1 pt-1 border-top">
+            <span class="text-body-secondary">Jami (butun davr)</span>
+            <span class="fw-semibold">{% if k.key == "sold_sum" %}{{ k.total|usd }}{% else %}{{ k.total|spaced }}{% if k.money %} soʻm{% endif %}{% endif %}</span>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -72,8 +81,8 @@
             {% for r in dash.year_rows %}
               <tr>
                 <th class="ps-3 fw-normal">{{ r.title }}</th>
-                <td class="text-end">{% if r.title == "Sotuvlar summasi" %}{{ r.cur|usd }}{% else %}{{ r.cur|spaced }}{% endif %}</td>
-                <td class="text-end">{% if r.title == "Sotuvlar summasi" %}{{ r.prev|usd }}{% else %}{{ r.prev|spaced }}{% endif %}</td>
+                <td class="text-end">{% if r.key == "sold_sum" %}{{ r.cur|usd }}{% else %}{{ r.cur|spaced }}{% endif %}</td>
+                <td class="text-end">{% if r.key == "sold_sum" %}{{ r.prev|usd }}{% else %}{{ r.prev|spaced }}{% endif %}</td>
                 <td class="text-end pe-3 fw-semibold {% if r.change.dir == 'up' %}text-success{% elif r.change.dir == 'down' %}text-danger{% else %}text-body-secondary{% endif %}">
                   <i class="fas {% if r.change.dir == 'up' %}fa-arrow-up{% elif r.change.dir == 'down' %}fa-arrow-down{% else %}fa-minus{% endif %}"></i>
                   {% if r.change.pct is not None %}{{ r.change.pct }}%{% else %}—{% endif %}</td>
@@ -141,14 +150,14 @@
     {# --- Bu oy ko'rib chiqilgan arizalar --- #}
     <div class="col-lg-5">
       <div class="card h-100 shadow-sm">
-        <div class="card-header"><h5 class="card-title m-0">Arizalar — {{ dash.month_name }}</h5></div>
+        <div class="card-header"><h5 class="card-title m-0">Arizalar — {{ dash.title }}</h5></div>
         <div class="card-body">
           <div class="row g-2 text-center">
-            <div class="col-6"><div class="ib-stat"><div class="fs-4 fw-bold">{{ dash.leads_month.in }}</div><div class="small text-body-secondary">Kelgan</div></div></div>
+            <div class="col-6"><div class="ib-stat"><div class="fs-4 fw-bold">{{ dash.leads_period.in }}</div><div class="small text-body-secondary">Kelgan</div></div></div>
             <div class="col-6"><div class="ib-stat"><div class="fs-4 fw-bold text-warning">{{ dash.pending_count|add:dash.contact_new }}</div><div class="small text-body-secondary">Kutilmoqda</div></div></div>
-            <div class="col-4"><div class="ib-stat"><div class="fs-5 fw-bold text-success">{{ dash.leads_month.accepted }}</div><div class="small text-body-secondary">Qabul</div></div></div>
-            <div class="col-4"><div class="ib-stat"><div class="fs-5 fw-bold text-secondary">{{ dash.leads_month.done }}</div><div class="small text-body-secondary">Yakunlangan</div></div></div>
-            <div class="col-4"><div class="ib-stat"><div class="fs-5 fw-bold text-danger">{{ dash.leads_month.rejected }}</div><div class="small text-body-secondary">Rad</div></div></div>
+            <div class="col-4"><div class="ib-stat"><div class="fs-5 fw-bold text-success">{{ dash.leads_period.accepted }}</div><div class="small text-body-secondary">Qabul</div></div></div>
+            <div class="col-4"><div class="ib-stat"><div class="fs-5 fw-bold text-secondary">{{ dash.leads_period.done }}</div><div class="small text-body-secondary">Yakunlangan</div></div></div>
+            <div class="col-4"><div class="ib-stat"><div class="fs-5 fw-bold text-danger">{{ dash.leads_period.rejected }}</div><div class="small text-body-secondary">Rad</div></div></div>
           </div>
         </div>
         <div class="card-footer small text-body-secondary">Qabul qilingan / rad etilgan arizalar roʻyxatdan ketadi — ularni «Holati» filtrida koʻrish mumkin.</div>

@@ -46,12 +46,13 @@ def make_available(modeladmin, request, queryset):
 
 @admin.action(description="Tanlanganlarni «Baraka boʻldi» (sotilgan) qilish")
 def make_sold(modeladmin, request, queryset):
-    queryset.update(status=Car.Status.SOLD, sold_at=timezone.localdate())
+    # allaqachon sotilganlarning sanasi o'zgarmasin
+    queryset.exclude(status=Car.Status.SOLD).update(status=Car.Status.SOLD, sold_at=timezone.localdate())
 
 
 @admin.action(description="Tanlanganlarni «Bron qilingan» qilish")
 def make_reserved(modeladmin, request, queryset):
-    queryset.update(status=Car.Status.RESERVED)
+    queryset.update(status=Car.Status.RESERVED, sold_at=None)
 
 
 @admin.register(Car)

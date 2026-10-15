@@ -174,8 +174,12 @@ class Car(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = self._make_slug()
-        if self.status == self.Status.SOLD and not self.sold_at:
-            self.sold_at = timezone.localdate()
+        # Sotilgan sana dashboard'da qaysi oyga yozilishini belgilaydi:
+        # sotilganda bugun qo'yiladi, sotuvdan qaytsa tozalanadi (qayta sotilsa yangi sana oladi)
+        if self.status == self.Status.SOLD:
+            self.sold_at = self.sold_at or timezone.localdate()
+        else:
+            self.sold_at = None
         super().save(*args, **kwargs)
 
     @property

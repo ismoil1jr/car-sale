@@ -158,7 +158,7 @@ class AdminReviewTests(TestCase):
         archive = self.client.get(reverse("admin:main_selllead_changelist") + "?holat=all")
         self.assertEqual(list(archive.context["cl"].result_list), [self.lead])
         dash = self.client.get(reverse("admin:index")).context["dash"]
-        self.assertEqual((dash["pending_count"], dash["leads_month"]["accepted"]), (0, 1))
+        self.assertEqual((dash["pending_count"], dash["leads_period"]["accepted"]), (0, 1))
 
     def test_reject(self):
         r = self.client.post(reverse("admin:main_selllead_reject", args=[self.lead.pk]), {"reason": "Narx baland"})
@@ -184,7 +184,7 @@ class AdminReviewTests(TestCase):
         self.assertEqual(r.status_code, 200)
         kpis = {k["key"]: k for k in r.context["dash"]["kpis"]}
         self.assertEqual(kpis["sold"]["value"], 1)
-        self.assertEqual(kpis["sold"]["ly"], 1)
+        self.assertEqual(kpis["sold"]["cmp"][1][1], 1)  # o'tgan yilning shu oyi
         self.assertEqual(kpis["ad_income"]["value"], 300000)
         self.assertEqual(r.context["dash"]["pending_count"], 1)
         self.assertContains(r, "Reklama tushumi")
@@ -346,3 +346,46 @@ class CarVideoTests(TestCase):
         from django.contrib.auth.models import User
         self.client.force_login(User.objects.create_superuser("boss", "b@x.uz", "pass12345"))
         self.assertContains(self.client.get(reverse("admin:main_car_add")), 'name="video_url"')
+
+
+class DashboardScopeTests(TestCase):
+    def setUp(self):
+        from datetime import timedelta
+        from django.contrib.auth.models import User
+        from django.utils import timezone
+        self.client.force_login(User.objects.create_superuser("boss", "b@x.uz", "pass12345"))
+        today = timezone.localdate()
+        prev_month = today.replace(day=1) - timedelta(days=1)
+        make_car(model="A", status="sold", sold_at=prev_month, price=100)
+        make_car(model="B", status="sold", sold_at=date_years_ago(3), price=50)
+
+    def kpi(self, query=""):
+        r = self.client.get(reverse("admin:index") + query)
+        return {k["key"]: k for k in r.context["dash"]["kpis"]}
+
+    def test_month_shows_all_time_total(self):
+        sold = self.kpi()["sold"]
+        self.assertEqual((sold["value"], sold["total"]), (0, 2))
+        self.assertEqual(sold["cmp"][0][1], 1)  # o'tgan oy
+        self.assertEqual(self.kpi("?davr=all")["sold_sum"]["value"], 150)
+        self.assertIsNone(self.kpi("?davr=all")["sold"]["total"])
+        self.assertEqual(self.kpi("?davr=nimadir")["sold"]["value"], 0)  # noto'g'ri qiymat — joriy oy
+        live = self.client.get(reverse("admin:dashboard_live") + "?davr=all").json()
+        self.assertIn("Butun davr", live["html"])
+
+    def test_resold_car_gets_new_date(self):
+        from django.utils import timezone
+        car = Car.objects.get(model="A")
+        car.status = "available"
+        car.save()
+        self.assertIsNone(car.sold_at)
+        car.status = "sold"
+        car.save()
+        self.assertEqual(car.sold_at, timezone.localdate())
+        self.assertEqual(self.kpi()["sold"]["value"], 1)
+
+
+def date_years_ago(n):
+    from django.utils import timezone
+    d = timezone.localdate()
+    return d.replace(year=d.year - n, day=1)

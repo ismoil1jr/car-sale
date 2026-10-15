@@ -76,7 +76,8 @@
     if (busy) return;
     busy = true;
     root.classList.add("is-loading");
-    fetch(root.getAttribute("data-ib-live"), { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } })
+    // tanlangan davr (?davr=year) jonli yangilanishda ham saqlansin
+    fetch(root.getAttribute("data-ib-live") + location.search, { credentials: "same-origin", headers: { "X-Requested-With": "fetch" } })
       .then(function (r) {
         if (r.redirected || !r.ok) throw new Error(r.status); // sessiya tugagan bo'lsa login sahifasiga yo'naltiriladi
         return r.json();
